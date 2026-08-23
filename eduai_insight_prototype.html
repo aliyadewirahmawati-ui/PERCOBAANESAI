@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduAI Insight - Dashboard Analitik Pembelajaran</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js untuk Grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .view-section {
+            display: none;
+            min-height: 100vh;
+        }
+        .view-section.active {
+            display: flex;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .bg-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <section id="view-landing" class="view-section active flex-col justify-center items-center relative overflow-hidden bg-slate-900 text-white">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20"></div>
+
+        <div class="z-10 text-center max-w-4xl px-6">
+            <div class="flex justify-center mb-6">
+                <div class="p-4 bg-blue-900/50 rounded-2xl border border-blue-500/30">
+                    <i data-lucide="brain" class="text-cyan-400 w-16 h-16"></i>
+                </div>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
+                EduAI <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Insight</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-cyan-200 mb-8 font-light">
+                Personalized Learning Through Artificial Intelligence
+            </p>
+            <p class="text-lg text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+                Platform pembelajaran adaptif berbasis AI yang membantu guru memahami kemampuan siswa dan memberikan rekomendasi pembelajaran yang lebih efektif.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <button onclick="navigateTo('view-teacher')" class="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
+                    <i data-lucide="users" class="w-5 h-5"></i> Login Guru
+                </button>
+                <button onclick="navigateTo('view-auth')" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                    <i data-lucide="book-open" class="w-5 h-5"></i> Login Siswa
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-auth" class="view-section flex-col items-center justify-center relative overflow-hidden bg-slate-50 p-6">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20"></div>
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden z-10">
+            <div class="p-8 bg-gradient-to-br from-blue-600 to-indigo-700 text-white text-center relative overflow-hidden">
+                <div class="absolute top-[-20%] left-[-10%] w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="relative z-10 flex justify-center mb-4">
+                    <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm shadow-inner">
+                        <i data-lucide="lock" class="w-8 h-8 text-white"></i>
+                    </div>
+                </div>
+                <h2 id="auth-title" class="text-2xl font-bold mb-1">Buat Akun Siswa</h2>
+                <p id="auth-subtitle" class="text-blue-100 text-sm">Daftar untuk mulai belajar dan evaluasi AI</p>
+            </div>
+            
+            <form id="auth-form" class="p-8 space-y-5" onsubmit="handleAuth(event)">
+                <div id="auth-error" class="hidden p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl flex items-center gap-2 animate-pulse">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i> <span id="auth-error-msg"></span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Alamat Email</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                        <input type="email" id="auth-email" required class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white" placeholder="email@siswa.com">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="lock" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                        <input type="password" id="auth-password" required class="w-full pl-11 pr-12 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white" placeholder="••••••••">
+                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 transition-colors">
+                            <i data-lucide="eye" id="eye-icon" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-sm text-center pt-2">
+                    <span id="auth-switch-text" class="text-slate-500">Sudah punya akun? </span>
+                    <button type="button" onclick="switchAuthMode()" id="auth-switch-btn" class="text-blue-600 font-semibold hover:underline">Login di sini</button>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="navigateTo('view-landing')" class="px-6 py-3 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Kembali</button>
+                    <button type="submit" id="auth-submit-btn" class="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2">
+                        Daftar Akun <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section id="view-profile" class="view-section flex-col items-center justify-center relative overflow-hidden bg-slate-50 p-6">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20"></div>
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden z-10">
+            <div class="p-8 bg-gradient-to-br from-blue-600 to-indigo-700 text-white text-center relative overflow-hidden">
+                <div class="absolute top-[-20%] left-[-10%] w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="relative z-10 flex justify-center mb-4">
+                    <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm shadow-inner">
+                        <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold mb-1">Lengkapi Profil</h2>
+                <p class="text-blue-100 text-sm">Isi data diri untuk melengkapi akun belajarmu</p>
+            </div>
+            
+            <form class="p-8 space-y-5" onsubmit="handleProfileSubmit(event)">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+                    <input type="text" id="profile-name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white" placeholder="Contoh: Ahmad Rizky">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Kelas</label>
+                    <select id="profile-class" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                        <option value="">Pilih...</option>
+                        <option value="Kelas X">Kelas X</option>
+                        <option value="Kelas XI">Kelas XI</option>
+                        <option value="Kelas XII">Kelas XII</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" class="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2">
+                        Mulai Ujian <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section id="view-assessment" class="view-section flex-col bg-slate-50">
+        <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-blue-100 rounded-lg">
+                    <i data-lucide="book-open" class="text-blue-600 w-5 h-5"></i>
+                </div>
+                <span id="assessment-title" class="font-bold text-slate-800 text-lg">Pre-Test Fisika</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full hidden sm:block">
+                    Peserta: <span id="assessment-student-name" class="text-slate-800 font-bold">Siswa</span>
+                </span>
+                <button onclick="logoutSiswa()" class="text-slate-500 hover:text-red-500 transition-colors">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 flex items-center justify-center p-6">
+            <div class="max-w-3xl w-full bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden relative">
+                
+                <div id="ai-loading" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm z-20 flex-col items-center justify-center">
+                    <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                    <h3 class="text-xl font-bold text-slate-800">AI Sedang Menganalisis...</h3>
+                    <p class="text-slate-500 mt-2">Mengevaluasi pola jawaban dan pemahaman konsepmu.</p>
+                </div>
+
+                <div class="w-full h-2 bg-slate-100">
+                    <div id="quiz-progress" class="h-full bg-gradient-to-r from-blue-400 to-blue-600 transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+
+                <div class="p-8 md:p-12">
+                    <div class="flex justify-between items-center mb-6">
+                        <div id="quiz-counter" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
+                            Soal 1 dari 10
+                        </div>
+                    </div>
+                    
+                    <h2 id="quiz-question" class="text-2xl font-bold text-slate-800 mb-8 leading-relaxed min-h-[80px]">
+                        Pertanyaan...
+                    </h2>
+
+                    <div id="quiz-options" class="space-y-4">
+                        <!-- Options generated by JS -->
+                    </div>
+
+                    <div class="mt-10 flex justify-between items-center border-t border-slate-100 pt-6">
+                        <button id="btn-prev" onclick="prevQuestion()" class="px-6 py-3 rounded-xl font-semibold transition-all text-slate-300 cursor-not-allowed opacity-50" disabled>
+                            Kembali
+                        </button>
+                        
+                        <button id="btn-next" onclick="nextQuestion()" class="px-8 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all transform active:scale-95 bg-slate-200 text-slate-400 cursor-not-allowed" disabled>
+                            <span id="btn-next-text">Selanjutnya</span> <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <section id="view-result" class="view-section flex-col bg-slate-50 pb-12">
+        <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-12 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-blue-100 rounded-lg"><i data-lucide="brain" class="text-blue-600 w-5 h-5"></i></div>
+                <span class="font-bold text-slate-800 text-lg">EduAI Feedback</span>
+            </div>
+            <button onclick="logoutSiswa()" class="text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2 text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+            </button>
+        </header>
+
+        <main class="max-w-4xl w-full mx-auto mt-8 px-6">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-bold text-slate-800 mb-2">Hasil Analisis AI</h1>
+                <p class="text-slate-500">Berdasarkan Pre-Test Fisika - <span id="res-name" class="font-semibold">Siswa</span></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 text-white flex flex-col justify-center items-center shadow-lg md:col-span-1 text-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                    <p class="text-blue-100 font-medium mb-2 relative z-10">Kemampuan Konsep</p>
+                    <div class="text-6xl font-extrabold mb-2 relative z-10"><span id="res-score">0</span><span class="text-3xl">%</span></div>
+                    <p id="res-status" class="text-sm bg-white/20 py-1 px-4 rounded-full mt-4 font-medium relative z-10 shadow-sm backdrop-blur-sm">Status</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 md:col-span-2 flex flex-col justify-center">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="flex items-center gap-2 text-green-600 font-bold mb-3"><i data-lucide="check-circle-2" class="w-5 h-5"></i> Kekuatan</h3>
+                            <ul id="res-strengths" class="list-disc list-inside text-slate-700 space-y-2 text-sm"></ul>
+                        </div>
+                        <div>
+                            <h3 class="flex items-center gap-2 text-orange-500 font-bold mb-3"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Perlu Diperbaiki</h3>
+                            <ul id="res-weaknesses" class="list-disc list-inside text-slate-700 space-y-2 text-sm"></ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-slate-100">
+                        <h3 class="text-slate-800 font-bold mb-2">💡 Rekomendasi AI Personal:</h3>
+                        <p id="res-ai-msg" class="text-slate-600 italic bg-blue-50 p-4 rounded-xl border border-blue-100 leading-relaxed text-sm"></p>
+                        
+                        <div class="mt-6 flex justify-end">
+                            <button onclick="navigateTo('view-learning')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                                Mulai Pembelajaran <i data-lucide="play-circle" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Map Pre-Test -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                <h2 class="text-xl font-bold text-slate-800 mb-8 flex items-center gap-2">
+                    <i data-lucide="map" class="w-5 h-5 text-blue-600"></i> Learning Progress Map
+                </h2>
+                <div class="relative">
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 z-0 hidden md:block"><div class="h-full bg-blue-500 w-1/4"></div></div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md shadow-green-200 mb-3"><i data-lucide="check-circle-2"></i></div><span class="font-semibold text-slate-800 text-sm">Pre-test</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200 ring-4 ring-white mb-3"><i data-lucide="brain"></i></div><span class="font-bold text-blue-600 text-sm">Analisis AI</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold mb-3 border-2 border-white">3</div><span class="font-medium text-slate-500 text-sm">Rekomendasi</span></div>
+                        <div class="flex flex-col items-center opacity-50"><div class="w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold mb-3 border-2 border-white">4</div><span class="font-medium text-slate-500 text-sm">Post-test</span></div>
+                        <div class="flex flex-col items-center opacity-50"><div class="w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold mb-3 border-2 border-white">5</div><span class="font-medium text-slate-500 text-sm">Evaluasi</span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <section id="view-learning" class="view-section flex-col bg-slate-50 pb-12">
+        <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-12 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-blue-100 rounded-lg"><i data-lucide="play-circle" class="text-blue-600 w-5 h-5"></i></div>
+                <span class="font-bold text-slate-800 text-lg">Materi Rekomendasi AI</span>
+            </div>
+            <button onclick="logoutSiswa()" class="text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2 text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+            </button>
+        </header>
+        <main class="max-w-4xl w-full mx-auto mt-8 px-6">
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 mb-6">
+                    <i data-lucide="video" class="text-blue-500 w-7 h-7"></i>
+                    <h2 class="text-2xl font-bold text-slate-800">Modul Pembelajaran Interaktif</h2>
+                </div>
+                
+                <div class="aspect-video bg-slate-900 rounded-xl mb-6 flex flex-col items-center justify-center text-white relative overflow-hidden group cursor-pointer border-4 border-slate-800">
+                    <div class="absolute inset-0 bg-blue-900/40 group-hover:bg-blue-900/20 transition-colors"></div>
+                    <i data-lucide="play-circle" class="w-16 h-16 text-white/80 group-hover:text-white group-hover:scale-110 transition-all z-10"></i>
+                    <p class="mt-4 font-medium z-10">Klik untuk memutar video simulasi</p>
+                    <p class="text-sm text-slate-400 z-10 mt-1">Sesuai dengan kelemahanmu pada materi Fisika</p>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-100 p-5 rounded-xl mb-8">
+                    <h3 class="font-bold text-blue-800 mb-2">Instruksi AI:</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Tonton simulasi di atas dengan seksama. Perhatikan bagaimana konsep saling berkaitan dan ingat kembali rumus dasar yang telah kamu pelajari. Setelah kamu paham, silakan lanjut ke Post-Test untuk mengukur peningkatanmu.
+                    </p>
+                </div>
+
+                <div class="flex justify-end border-t border-slate-100 pt-6">
+                    <button onclick="startPostTest()" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 transform active:scale-95">
+                        Mulai Post-Test <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 mt-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-8 flex items-center gap-2">
+                    <i data-lucide="map" class="w-5 h-5 text-blue-600"></i> Learning Progress Map
+                </h2>
+                <div class="relative">
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 z-0 hidden md:block"><div class="h-full bg-blue-500 w-2/4"></div></div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md shadow-green-200 mb-3"><i data-lucide="check-circle-2"></i></div><span class="font-semibold text-slate-800 text-sm">Pre-test</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md shadow-green-200 mb-3"><i data-lucide="check-circle-2"></i></div><span class="font-semibold text-slate-800 text-sm">Analisis AI</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200 ring-4 ring-white mb-3"><i data-lucide="play-circle"></i></div><span class="font-bold text-blue-600 text-sm">Rekomendasi</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold mb-3 border-2 border-white">4</div><span class="font-medium text-slate-500 text-sm">Post-test</span></div>
+                        <div class="flex flex-col items-center opacity-50"><div class="w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold mb-3 border-2 border-white">5</div><span class="font-medium text-slate-500 text-sm">Evaluasi</span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <section id="view-final" class="view-section flex-col bg-slate-50 pb-12">
+        <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-12 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-blue-100 rounded-lg"><i data-lucide="trophy" class="text-blue-600 w-5 h-5"></i></div>
+                <span class="font-bold text-slate-800 text-lg">Evaluasi Akhir AI</span>
+            </div>
+            <button onclick="logoutSiswa()" class="text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2 text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+            </button>
+        </header>
+
+        <main class="max-w-4xl w-full mx-auto mt-8 px-6">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-bold text-slate-800 mb-2">Selamat, Evaluasi Selesai!</h1>
+                <p class="text-slate-500">Inilah hasil perjalanan belajarmu, <span id="final-name" class="font-semibold">Siswa</span></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 text-center flex flex-col justify-center items-center">
+                    <p class="text-slate-500 font-medium mb-2">Pre-Test</p>
+                    <div id="final-pre-score" class="text-5xl font-bold text-slate-700">0%</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white flex flex-col justify-center items-center shadow-lg relative overflow-hidden transform scale-105 z-10">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                    <p class="text-green-100 font-medium mb-2">Post-Test Akhir</p>
+                    <div id="final-post-score" class="text-6xl font-extrabold mb-2">0%</div>
+                    <div id="final-improvement" class="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm font-medium mt-2">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> Naik
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col justify-center">
+                    <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="brain" class="text-blue-600 w-5 h-5"></i> Kesimpulan AI</h3>
+                    <p id="final-ai-msg" class="text-sm text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 mt-6">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="map" class="w-5 h-5 text-blue-600"></i> Learning Progress Map
+                    </h2>
+                    <button onclick="logoutSiswa()" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-medium transition-colors">
+                        Kembali ke Beranda
+                    </button>
+                </div>
+                <div class="relative">
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 z-0 hidden md:block"><div class="h-full bg-green-500 w-full"></div></div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md shadow-green-200 mb-3"><i data-lucide="check-circle-2"></i></div><span class="font-semibold text-slate-800 text-sm">Pre-test</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md shadow-green-200 mb-3"><i data-lucide="check-circle-2"></i></div><span class="font-semibold text-slate-800 text-sm">Analisis AI</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md shadow-green-200 mb-3"><i data-lucide="check-circle-2"></i></div><span class="font-semibold text-slate-800 text-sm">Rekomendasi</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md shadow-green-200 mb-3"><i data-lucide="check-circle-2"></i></div><span class="font-semibold text-slate-800 text-sm">Post-test</span></div>
+                        <div class="flex flex-col items-center"><div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200 ring-4 ring-white mb-3"><i data-lucide="trophy"></i></div><span class="font-bold text-blue-600 text-sm">Evaluasi</span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <section id="view-teacher" class="view-section flex bg-slate-50">
+        <!-- Sidebar Desktop -->
+        <div class="w-64 bg-white border-r border-slate-200 flex-col shadow-sm hidden md:flex">
+            <div class="p-6 flex items-center gap-3">
+                <div class="p-2 bg-blue-100 rounded-lg"><i data-lucide="brain" class="text-blue-600 w-6 h-6"></i></div>
+                <span class="text-xl font-bold text-slate-800">EduAI Insight</span>
+            </div>
+            
+            <nav class="flex-1 px-4 py-4 space-y-2">
+                <button onclick="setTeacherMenu('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left bg-blue-50 text-blue-700 font-medium">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </button>
+                <button onclick="setTeacherMenu('ai')" id="menu-ai" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left text-slate-500 hover:bg-slate-50 hover:text-slate-700">
+                    <i data-lucide="brain" class="w-5 h-5"></i> AI Recommendation
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-200">
+                <button onclick="navigateTo('view-landing')" class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium">
+                    <i data-lucide="log-out" class="w-5 h-5"></i> Keluar
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 overflow-auto bg-slate-50/50">
+            <div class="p-6 md:p-8">
+                <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <h2 id="teacher-view-title" class="text-2xl font-bold text-slate-800">Dashboard</h2>
+                    <div class="flex items-center justify-between md:justify-end gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-slate-500 hidden sm:block">T.A. 2026/2027</span>
+                            <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold border-2 border-white shadow-sm">GR</div>
+                        </div>
+                        <button onclick="navigateTo('view-landing')" class="md:hidden flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium border border-red-100">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Teacher: Dashboard View -->
+                <div id="teacher-sub-dashboard" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-start">
+                            <div><p class="text-sm text-slate-500 mb-1">Total Siswa</p><h3 id="stat-total" class="text-3xl font-bold text-slate-800">120</h3></div>
+                            <div class="p-3 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="users" class="w-6 h-6"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-start">
+                            <div><p class="text-sm text-slate-500 mb-1">Rata-rata Pemahaman</p><h3 class="text-3xl font-bold text-slate-800">78%</h3></div>
+                            <div class="p-3 bg-green-50 rounded-lg text-green-600"><i data-lucide="activity" class="w-6 h-6"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-start">
+                            <div><p class="text-sm text-slate-500 mb-1">Butuh Intervensi</p><h3 class="text-3xl font-bold text-red-500">15</h3></div>
+                            <div class="p-3 bg-red-50 rounded-lg text-red-500"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-start">
+                            <div><p class="text-sm text-slate-500 mb-1">Materi Tersulit</p><h3 class="text-lg font-bold text-slate-800 mt-2 leading-tight">Glb. Elektromagnetik</h3></div>
+                            <div class="p-3 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="book-open" class="w-6 h-6"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <h3 class="text-lg font-semibold text-slate-800 mb-4">Perkembangan Nilai Siswa</h3>
+                            <div class="h-64"><canvas id="lineChart"></canvas></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <h3 class="text-lg font-semibold text-slate-800 mb-4">Tingkat Pemahaman Materi</h3>
+                            <div class="h-64"><canvas id="barChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-800">Student Risk Prediction (AI Analysis)</h3>
+                                <p class="text-sm text-slate-500 mt-1">Daftar siswa berdasarkan tingkat pemahaman dan rekomendasi intervensi.</p>
+                            </div>
+                            <span class="px-3 py-1 bg-green-50 text-green-600 text-xs font-semibold rounded-full border border-green-200 animate-pulse">Live Auto-Sync</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-sm font-medium text-slate-500">Nama Siswa</th>
+                                        <th class="px-6 py-4 text-sm font-medium text-slate-500">Pre-Test</th>
+                                        <th class="px-6 py-4 text-sm font-medium text-slate-500">Post-Test</th>
+                                        <th class="px-6 py-4 text-sm font-medium text-slate-500">Status Awal</th>
+                                        <th class="px-6 py-4 text-sm font-medium text-slate-500">Rekomendasi AI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-table-body" class="divide-y divide-slate-100">
+                                    <!-- Table Rows Generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher: AI Rec View -->
+                <div id="teacher-sub-ai" class="hidden h-[500px] bg-white rounded-2xl shadow-sm border border-slate-100 flex-col">
+                    <div class="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50 rounded-t-2xl">
+                        <div class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i data-lucide="message-square" class="w-5 h-5"></i></div>
+                        <div>
+                            <h3 class="font-semibold text-slate-800">EduAI Assistant</h3>
+                            <p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> Online</p>
+                        </div>
+                    </div>
+                    
+                    <div id="chat-history" class="flex-1 overflow-y-auto p-6 space-y-4">
+                        <div class="flex justify-start">
+                            <div class="max-w-[75%] p-4 rounded-2xl bg-slate-100 text-slate-700 rounded-tl-none border border-slate-200">
+                                <p class="text-sm leading-relaxed">Halo! Saya EduAI Assistant. Ada yang bisa saya bantu terkait analisis performa siswa kelas Anda hari ini?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form onsubmit="handleChatSubmit(event)" class="p-4 border-t border-slate-100 bg-white rounded-b-2xl flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Tanya AI tentang analisis kelas (coba ketik 'listrik')..." class="flex-1 px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50">
+                        <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center shadow-md shadow-blue-200">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Database & States
+        const usersDb = {};
+        let allStudentsData = [
+            { id: 1, name: 'Andi Pratama', kelas: 'Kelas X', preScore: 65, postScore: 85, status: 'Perlu Pendampingan', rec: 'Penguatan konsep dasar gelombang' },
+            { id: 2, name: 'Budi Santoso', kelas: 'Kelas XI', preScore: 90, postScore: 95, status: 'Sangat Baik', rec: 'Materi pengayaan lanjutan' },
+            { id: 3, name: 'Citra Kirana', kelas: 'Kelas XII', preScore: 72, postScore: 88, status: 'Cukup', rec: 'Latihan soal numerik tambahan' },
+            { id: 4, name: 'Dina Amelia', kelas: 'Kelas X', preScore: 58, postScore: 75, status: 'Perlu Pendampingan', rec: 'Sesi mentoring 1-on-1' },
+        ];
+        
+        let activeEmail = '';
+        let activeStudent = null;
+        let isSignUp = true;
+        let testMode = 'pre'; // 'pre' or 'post'
+
+        // Questions Data
+        const questions = [
+            { id: 1, text: "Ketika sebuah benda bergerak dengan kecepatan tetap, jenis gerak yang terjadi adalah?", options: [{id:'a', t:'Gerak berubah beraturan'}, {id:'b', t:'Gerak lurus beraturan'}, {id:'c', t:'Gerak melingkar'}, {id:'d', t:'Gerak parabola'}], ans: 'b' },
+            { id: 2, text: "Berdasarkan Hukum I Newton, jika resultan gaya yang bekerja pada benda sama dengan nol, maka benda yang semula diam akan...", options: [{id:'a', t:'Tetap diam'}, {id:'b', t:'Bergerak lurus berubah beraturan'}, {id:'c', t:'Berubah arah gerak'}, {id:'d', t:'Bergerak dengan kecepatan konstan'}], ans: 'a' },
+            { id: 3, text: "Arah gaya gesek kinetis yang bekerja pada suatu benda yang sedang bergerak selalu...", options: [{id:'a', t:'Searah dengan arah gerak'}, {id:'b', t:'Berlawanan arah dengan gerak'}, {id:'c', t:'Tegak lurus dengan gerak'}, {id:'d', t:'Searah dengan gaya berat'}], ans: 'b' },
+            { id: 4, text: "Gelombang elektromagnetik memiliki ciri khas yaitu...", options: [{id:'a', t:'Kecepatannya di bawah bunyi'}, {id:'b', t:'Hanya di benda padat'}, {id:'c', t:'Dapat merambat di ruang hampa'}, {id:'d', t:'Selalu longitudinal'}], ans: 'c' },
+            { id: 5, text: "Besaran yang digunakan untuk menyatakan kuat arus listrik dalam SI adalah...", options: [{id:'a', t:'Ampere'}, {id:'b', t:'Volt'}, {id:'c', t:'Ohm'}, {id:'d', t:'Watt'}], ans: 'a' },
+            { id: 6, text: "Energi yang dimiliki oleh suatu benda karena pengaruh kedudukan atau letaknya disebut...", options: [{id:'a', t:'Energi Kinetik'}, {id:'b', t:'Energi Mekanik'}, {id:'c', t:'Energi Potensial'}, {id:'d', t:'Energi Panas'}], ans: 'c' },
+            { id: 7, text: "Besar energi kinetik pada suatu benda bergerak sangat bergantung pada...", options: [{id:'a', t:'Massa dan waktu'}, {id:'b', t:'Gaya dan jarak'}, {id:'c', t:'Kecepatan dan percepatan'}, {id:'d', t:'Massa dan kecepatan'}], ans: 'd' },
+            { id: 8, text: "Sifat bayangan yang dibentuk oleh cermin datar adalah...", options: [{id:'a', t:'Maya, tegak, sama besar'}, {id:'b', t:'Nyata, terbalik, diperkecil'}, {id:'c', t:'Maya, terbalik, sama besar'}, {id:'d', t:'Nyata, tegak, diperbesar'}], ans: 'a' },
+            { id: 9, text: "Perpindahan kalor dari matahari sampai ke bumi terjadi melalui peristiwa...", options: [{id:'a', t:'Konduksi'}, {id:'b', t:'Radiasi'}, {id:'c', t:'Konveksi'}, {id:'d', t:'Isolasi'}], ans: 'b' },
+            { id: 10, text: "Besaran fisika yang memiliki nilai sekaligus arah disebut...", options: [{id:'a', t:'Besaran Pokok'}, {id:'b', t:'Besaran Turunan'}, {id:'c', t:'Besaran Vektor'}, {id:'d', t:'Besaran Skalar'}], ans: 'c' }
+        ];
+
+        let currentQIndex = 0;
+        let answers = {};
+        
+        // Charts Objects
+        let lineChartObj = null;
+        let barChartObj = null;
+
+        // Init Icons
+        lucide.createIcons();
+
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (viewId === 'view-teacher') {
+                updateTeacherTable();
+                initCharts();
+            }
+        }
+
+        // Auth Logic
+        function switchAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('auth-title').innerText = isSignUp ? 'Buat Akun Siswa' : 'Login Siswa';
+            document.getElementById('auth-subtitle').innerText = isSignUp ? 'Daftar untuk mulai belajar dan evaluasi AI' : 'Masuk kembali ke akun belajarmu';
+            document.getElementById('auth-switch-text').innerText = isSignUp ? 'Sudah punya akun? ' : 'Belum punya akun? ';
+            document.getElementById('auth-switch-btn').innerText = isSignUp ? 'Login di sini' : 'Daftar sekarang';
+            document.getElementById('auth-submit-btn').innerHTML = (isSignUp ? 'Daftar Akun' : 'Masuk') + ' <i data-lucide="chevron-right" class="w-4 h-4"></i>';
+            document.getElementById('auth-error').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        function togglePassword() {
+            const pwdInput = document.getElementById('auth-password');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        function showError(msg) {
+            const errDiv = document.getElementById('auth-error');
+            document.getElementById('auth-error-msg').innerText = msg;
+            errDiv.classList.remove('hidden');
+        }
+
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pwd = document.getElementById('auth-password').value;
+            document.getElementById('auth-error').classList.add('hidden');
+
+            if (isSignUp) {
+                if (usersDb[email]) {
+                    showError('Email sudah terdaftar. Silakan pindah ke mode Login.');
+                    return;
+                }
+                usersDb[email] = { password: pwd, profile: null };
+                activeEmail = email;
+                navigateTo('view-profile');
+            } else {
+                const user = usersDb[email];
+                if (!user) {
+                    showError('Email belum terdaftar. Silakan Daftar Akun terlebih dahulu.');
+                    return;
+                }
+                if (user.password !== pwd) {
+                    showError('Password yang Anda masukkan salah.');
+                    return;
+                }
+                activeEmail = email;
+                if (user.profile) {
+                    activeStudent = { ...user.profile, email: email, id: user.id };
+                    if (user.profile.postScore !== undefined) navigateTo('view-final');
+                    else if (user.profile.preScore !== undefined) {
+                        populateResult();
+                        navigateTo('view-result');
+                    }
+                    else startQuiz('pre');
+                } else {
+                    navigateTo('view-profile');
+                }
+            }
+        }
+
+        function handleProfileSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('profile-name').value;
+            const kelas = document.getElementById('profile-class').value;
+            const id = Date.now();
+            
+            activeStudent = { name, kelas, email: activeEmail, id };
+            usersDb[activeEmail].profile = activeStudent;
+            usersDb[activeEmail].id = id;
+            
+            startQuiz('pre');
+        }
+
+        function logoutSiswa() {
+            activeEmail = '';
+            activeStudent = null;
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-error').classList.add('hidden');
+            navigateTo('view-landing');
+        }
+
+        function startQuiz(mode) {
+            testMode = mode;
+            currentQIndex = 0;
+            answers = {};
+            document.getElementById('assessment-title').innerText = mode === 'pre' ? 'Pre-Test Fisika' : 'Post-Test Akhir Fisika';
+            document.getElementById('assessment-student-name').innerText = activeStudent.name;
+            document.getElementById('ai-loading').classList.add('hidden');
+            renderQuestion();
+            navigateTo('view-assessment');
+        }
+
+        function startPostTest() {
+            startQuiz('post');
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQIndex];
+            document.getElementById('quiz-counter').innerText = `Soal ${currentQIndex + 1} dari ${questions.length}`;
+            document.getElementById('quiz-question').innerText = q.text;
+            
+            const progress = (currentQIndex / questions.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progress}%`;
+
+            const optsDiv = document.getElementById('quiz-options');
+            optsDiv.innerHTML = '';
+            
+            q.options.forEach(opt => {
+                const isSel = answers[currentQIndex] === opt.id;
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-5 rounded-xl border-2 transition-all flex items-center gap-4 ${isSel ? 'border-blue-500 bg-blue-50 shadow-md ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}`;
+                btn.onclick = () => selectOption(opt.id);
+                btn.innerHTML = `
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${isSel ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-600'}">${opt.id.toUpperCase()}</div>
+                    <span class="text-lg ${isSel ? 'font-medium text-blue-900' : 'text-slate-700'}">${opt.t}</span>
+                `;
+                optsDiv.appendChild(btn);
+            });
+
+            const btnPrev = document.getElementById('btn-prev');
+            if (currentQIndex === 0) {
+                btnPrev.disabled = true;
+                btnPrev.className = "px-6 py-3 rounded-xl font-semibold transition-all text-slate-300 cursor-not-allowed opacity-50";
+            } else {
+                btnPrev.disabled = false;
+                btnPrev.className = "px-6 py-3 rounded-xl font-semibold transition-all text-slate-600 hover:bg-slate-100";
+            }
+
+            const btnNext = document.getElementById('btn-next');
+            if (!answers[currentQIndex]) {
+                btnNext.disabled = true;
+                btnNext.className = "px-8 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all transform active:scale-95 bg-slate-200 text-slate-400 cursor-not-allowed";
+            } else {
+                btnNext.disabled = false;
+                btnNext.className = "px-8 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all transform active:scale-95 bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200";
+            }
+            
+            document.getElementById('btn-next-text').innerText = (currentQIndex === questions.length - 1) ? 'Selesai & Evaluasi AI' : 'Selanjutnya';
+        }
+
+        function selectOption(id) {
+            answers[currentQIndex] = id;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQIndex > 0) {
+                currentQIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQIndex === questions.length - 1) {
+                submitQuiz();
+            } else {
+                currentQIndex++;
+                renderQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            document.getElementById('ai-loading').classList.remove('hidden');
+            
+            let correct = 0;
+            questions.forEach((q, i) => { if (answers[i] === q.ans) correct++; });
+            const score = (correct / questions.length) * 100;
+
+            setTimeout(() => {
+                if (testMode === 'pre') {
+                    let status = score >= 80 ? 'Sangat Baik' : score >= 60 ? 'Cukup' : 'Perlu Pendampingan';
+                    let rec = score >= 80 ? 'Materi pengayaan lanjutan' : score >= 60 ? 'Latihan soal numerik tambahan' : 'Sesi simulasi visual dasar';
+                    
+                    activeStudent.preScore = score;
+                    activeStudent.status = status;
+                    activeStudent.rec = rec;
+                    updateGlobalData(activeStudent);
+                    
+                    populateResult();
+                    navigateTo('view-result');
+                } else {
+                    activeStudent.postScore = score;
+                    updateGlobalData(activeStudent);
+                    
+                    populateFinalResult();
+                    navigateTo('view-final');
+                }
+            }, 2000);
+        }
+
+        function updateGlobalData(stu) {
+            const idx = allStudentsData.findIndex(s => s.id === stu.id);
+            if (idx >= 0) allStudentsData[idx] = stu;
+            else allStudentsData.unshift(stu);
+            
+            if(usersDb[stu.email]) usersDb[stu.email].profile = stu;
+        }
+
+        function populateResult() {
+            const score = activeStudent.preScore;
+            document.getElementById('res-name').innerText = activeStudent.name;
+            document.getElementById('res-score').innerText = score;
+            document.getElementById('res-status').innerText = 'Status: ' + (score >= 80 ? 'Sangat Baik' : score >= 60 ? 'Cukup' : 'Perlu Pendampingan');
+            
+            document.getElementById('res-strengths').innerHTML = score >= 80 
+                ? '<li>Pemahaman konsep dasar kuat</li><li>Membaca grafik v-t</li>' 
+                : '<li>Mengenali variabel besaran fisika</li><li>Kemauan mencoba memecahkan masalah</li>';
+                
+            document.getElementById('res-weaknesses').innerHTML = score >= 80 
+                ? '<li>Analisis soal kompleks / HOTS</li><li>Penerapan rumus gerak parabola</li>' 
+                : '<li>Pemahaman konsep dasar kecepatan</li><li>Perhitungan matematis dasar</li>';
+                
+            document.getElementById('res-ai-msg').innerText = score >= 80 
+                ? `"Kerja bagus! Konsep dasarmu sudah kuat. Pelajari kembali materi Gerak Parabola menggunakan simulasi visual."`
+                : `"Jangan menyerah! Mari perkuat pondasi fisika kamu. Tonton ulang Video Modul dan kerjakan latihan dasar."`;
+        }
+
+        function populateFinalResult() {
+            const pre = activeStudent.preScore || 0;
+            const post = activeStudent.postScore || 0;
+            const imp = post - pre;
+            
+            document.getElementById('final-name').innerText = activeStudent.name;
+            document.getElementById('final-pre-score').innerText = pre + '%';
+            document.getElementById('final-post-score').innerText = post + '%';
+            
+            const impEl = document.getElementById('final-improvement');
+            impEl.innerHTML = `<i data-lucide="${imp >= 0 ? 'trending-up' : 'trending-down'}" class="w-4 h-4"></i> ${imp >= 0 ? 'Naik' : 'Turun'} ${Math.abs(imp)}%`;
+            impEl.className = `flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm font-medium mt-2 ${imp < 0 ? 'text-red-100' : ''}`;
+            
+            let msg = "";
+            if (imp > 0) msg = "Luar biasa! Kamu menunjukkan peningkatan yang signifikan setelah mempelajari rekomendasi materi. Pemahaman konsepmu jauh lebih matang.";
+            else if (imp === 0) msg = "Nilaimu stabil. Pertahankan semangat belajarmu dan jangan ragu untuk bertanya pada guru jika ada konsep yang masih membingungkan.";
+            else msg = "Sepertinya kamu butuh sedikit lebih banyak waktu untuk menguasai materi ini. Jangan menyerah, AI telah mengirimkan catatan khusus ke gurumu.";
+            
+            document.getElementById('final-ai-msg').innerText = msg;
+            lucide.createIcons();
+        }
+
+        function setTeacherMenu(menu) {
+            document.getElementById('teacher-sub-dashboard').classList.add('hidden');
+            document.getElementById('teacher-sub-ai').classList.add('hidden');
+            
+            document.getElementById('menu-dashboard').className = "menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left text-slate-500 hover:bg-slate-50 hover:text-slate-700";
+            document.getElementById('menu-ai').className = "menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left text-slate-500 hover:bg-slate-50 hover:text-slate-700";
+
+            if (menu === 'dashboard') {
+                document.getElementById('teacher-sub-dashboard').classList.remove('hidden');
+                document.getElementById('menu-dashboard').classList.add('bg-blue-50', 'text-blue-700', 'font-medium');
+                document.getElementById('menu-dashboard').classList.remove('text-slate-500', 'hover:bg-slate-50');
+                document.getElementById('teacher-view-title').innerText = "Dashboard";
+            } else {
+                document.getElementById('teacher-sub-ai').classList.remove('hidden');
+                document.getElementById('teacher-sub-ai').classList.add('flex');
+                document.getElementById('menu-ai').classList.add('bg-blue-50', 'text-blue-700', 'font-medium');
+                document.getElementById('menu-ai').classList.remove('text-slate-500', 'hover:bg-slate-50');
+                document.getElementById('teacher-view-title').innerText = "AI Recommendation";
+            }
+        }
+
+        function updateTeacherTable() {
+            document.getElementById('stat-total').innerText = 116 + allStudentsData.length;
+            const tbody = document.getElementById('student-table-body');
+            tbody.innerHTML = '';
+            
+            allStudentsData.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                
+                let badgeClass = 'bg-red-100 text-red-700';
+                if (s.status === 'Sangat Baik') badgeClass = 'bg-green-100 text-green-700';
+                else if (s.status === 'Cukup') badgeClass = 'bg-blue-100 text-blue-700';
+                else if (s.status === 'Perlu Pendampingan') badgeClass = 'bg-yellow-100 text-yellow-700';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4"><p class="font-medium text-slate-800">${s.name}</p><p class="text-xs text-slate-400">${s.kelas}</p></td>
+                    <td class="px-6 py-4 font-bold text-slate-700">${s.preScore !== undefined ? s.preScore + '%' : '-'}</td>
+                    <td class="px-6 py-4 font-bold text-blue-600">${s.postScore !== undefined ? s.postScore + '%' : '<span class="text-slate-300 font-normal italic">Belum</span>'}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${badgeClass}">${s.status || '-'}</span></td>
+                    <td class="px-6 py-4 text-sm text-slate-600">${s.rec || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function initCharts() {
+            if (lineChartObj) lineChartObj.destroy();
+            if (barChartObj) barChartObj.destroy();
+
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            lineChartObj = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
+                    datasets: [
+                        { label: 'Pre-Test', data: [60, 65, 62, 68, 70], borderColor: '#94a3b8', borderWidth: 3, tension: 0.4 },
+                        { label: 'Post-Test', data: [75, 78, 80, 85, 88], borderColor: '#3b82f6', borderWidth: 3, tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 0, max: 100 } } }
+            });
+
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            barChartObj = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Mekanika', 'Fluida', 'Gelombang', 'Listrik', 'Optik'],
+                    datasets: [{ label: 'Pemahaman (%)', data: [85, 75, 60, 70, 82], backgroundColor: '#06b6d4', borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
+            });
+        }
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('chat-input');
+            const txt = inputEl.value.trim();
+            if (!txt) return;
+
+            const chatBox = document.getElementById('chat-history');
+            
+            // Add user msg
+            chatBox.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="max-w-[75%] p-4 rounded-2xl bg-blue-600 text-white rounded-tr-none shadow-sm">
+                        <p class="text-sm leading-relaxed">${txt}</p>
+                    </div>
+                </div>
+            `;
+            inputEl.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Simulate AI
+            setTimeout(() => {
+                let aiRes = "Saya sedang menganalisis data tersebut. Berikan saya waktu sebentar.";
+                if (txt.toLowerCase().includes('listrik')) {
+                    aiRes = "Berdasarkan data evaluasi terbaru, sebagian besar siswa mengalami miskonsepsi pada konsep beda potensial dan arus listrik. Saya menyarankan penggunaan simulasi visual PhET untuk materi sirkuit DC.";
+                }
+                chatBox.innerHTML += `
+                    <div class="flex justify-start">
+                        <div class="max-w-[75%] p-4 rounded-2xl bg-slate-100 text-slate-700 rounded-tl-none border border-slate-200">
+                            <p class="text-sm leading-relaxed">${aiRes}</p>
+                        </div>
+                    </div>
+                `;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
