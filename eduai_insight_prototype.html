@@ -434,9 +434,9 @@
         </main>
     </section>
 
-    <section id="view-teacher" class="view-section flex bg-slate-50">
+    <section id="view-teacher" class="view-section flex h-screen overflow-hidden bg-slate-50">
         <!-- Sidebar Desktop -->
-        <div class="w-64 bg-white border-r border-slate-200 flex-col shadow-sm hidden md:flex">
+        <div class="w-64 h-screen shrink-0 bg-white border-r border-slate-200 flex-col shadow-sm hidden md:flex">
             <div class="p-6 flex items-center gap-3">
                 <div class="p-2 bg-blue-100 rounded-lg"><i data-lucide="brain" class="text-blue-600 w-6 h-6"></i></div>
                 <span class="text-xl font-bold text-slate-800">EduAI Insight</span>
@@ -465,7 +465,7 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex-1 overflow-auto bg-slate-50/50">
+        <div class="flex-1 min-w-0 h-screen overflow-y-auto bg-slate-50/50">
             <div class="p-6 md:p-8">
                 <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                     <h2 id="teacher-view-title" class="text-2xl font-bold text-slate-800">Dashboard</h2>
@@ -609,6 +609,7 @@
         let activeStudent = null;
         let isSignUp = true;
         let testMode = 'pre'; // 'pre' or 'post'
+        let currentRoute = 'view-landing';
 
         // Questions Data
         const questions = [
@@ -635,8 +636,15 @@
         lucide.createIcons();
 
         function navigateTo(viewId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
+            const targetView = document.getElementById(viewId);
+            if (!targetView || !targetView.classList.contains('view-section')) return;
+
+            document.querySelectorAll('.view-section').forEach(view => {
+                const isTarget = view === targetView;
+                view.classList.toggle('active', isTarget);
+                view.setAttribute('aria-hidden', String(!isTarget));
+            });
+            currentRoute = viewId;
             window.scrollTo(0, 0);
 
             if (viewId === 'view-teacher') {
