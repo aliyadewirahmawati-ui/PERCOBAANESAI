@@ -201,6 +201,26 @@
             </div>
             <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </main>
+        <div id="chapter-choice-dialog" class="hidden fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-6">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+                <div class="flex justify-between items-start gap-4 mb-6">
+                    <div>
+                        <p class="text-sm font-semibold text-blue-600 mb-1">Materi terpilih</p>
+                        <h2 id="chapter-choice-title" class="text-2xl font-bold text-slate-800">-</h2>
+                    </div>
+                    <button onclick="closeChapterChoice()" aria-label="Tutup pilihan" class="p-2 text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <p class="text-slate-500 mb-6">Kamu mau memahami materi terlebih dahulu atau langsung mengerjakan kuis?</p>
+                <div class="space-y-3">
+                    <button onclick="chooseChapterAction('learn')" class="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-blue-100 text-left hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                        <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i><span><strong class="block text-slate-800">Pelajari Materi Dulu</strong><small class="text-slate-500">Baca modul sebelum mengerjakan kuis.</small></span>
+                    </button>
+                    <button onclick="chooseChapterAction('quiz')" class="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 text-left hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                        <i data-lucide="clipboard-list" class="w-5 h-5 text-blue-600"></i><span><strong class="block text-slate-800">Langsung Kuis</strong><small class="text-slate-500">Mulai pre-test untuk bab ini sekarang.</small></span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </section>
 
     <section id="view-assessment" class="view-section flex-col bg-slate-50">
@@ -369,7 +389,7 @@
                 </div>
 
                 <div class="flex justify-end border-t border-slate-100 pt-6">
-                    <button onclick="startPostTest()" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 transform active:scale-95">
+                    <button id="learning-action-button" onclick="startPostTest()" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 transform active:scale-95">
                         Mulai Post-Test <i data-lucide="chevron-right" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -728,7 +748,23 @@
             selectedChapter = materials.find(material => material.id === chapterId) || materials[0];
             activeStudent.chapterId = selectedChapter.id;
             if (usersDb[activeStudent.email]) usersDb[activeStudent.email].profile = activeStudent;
-            startQuiz('pre');
+            document.getElementById('chapter-choice-title').innerText = selectedChapter.title;
+            const dialog = document.getElementById('chapter-choice-dialog');
+            dialog.classList.remove('hidden');
+            dialog.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeChapterChoice() {
+            const dialog = document.getElementById('chapter-choice-dialog');
+            dialog.classList.add('hidden');
+            dialog.classList.remove('flex');
+        }
+
+        function chooseChapterAction(action) {
+            closeChapterChoice();
+            if (action === 'learn') navigateTo('view-learning');
+            else startQuiz('pre');
         }
 
         function analyzeStudent(student) {
@@ -1015,10 +1051,17 @@
         function renderLearningResource() {
             if (!activeStudent) return;
             const analysis = normalizeStudent(activeStudent);
-            const resource = learningResources[analysis.weakestTopic] || learningResources.Mekanika;
+            const resource = selectedChapter ? learningResources[selectedChapter.topics[0]] : learningResources[analysis.weakestTopic] || learningResources.Mekanika;
             document.getElementById('learning-header-title').innerText = `Materi ${selectedChapter?.title || 'Rekomendasi AI'}`;
             document.getElementById('learning-resource-visual').querySelector('p').innerText = `${resource.title} - ${resource.type}`;
-            document.getElementById('learning-resource-description').innerText = `${resource.description} Fokus belajar dipilih dari topik terlemahmu (${analysis.weakestTopic}: ${analysis.topicScores[analysis.weakestTopic]}%). Setelah paham, lanjutkan ke Post-Test.`;
+            const hasPreTest = activeStudent.preScore !== undefined;
+            document.getElementById('learning-resource-description').innerText = hasPreTest
+                ? `${resource.description} Fokus lanjutan untuk bab ${selectedChapter?.title || 'ini'}. Setelah paham, lanjutkan ke Post-Test.`
+                : `${resource.description} Ini adalah materi pengantar untuk ${selectedChapter?.title || 'bab pilihanmu'}. Setelah paham, lanjutkan ke Pre-Test.`;
+            const actionButton = document.getElementById('learning-action-button');
+            actionButton.innerHTML = `${hasPreTest ? 'Mulai Post-Test' : 'Mulai Pre-Test'} <i data-lucide="chevron-right" class="w-5 h-5"></i>`;
+            actionButton.onclick = hasPreTest ? startPostTest : () => startQuiz('pre');
+            lucide.createIcons();
         }
 
         function populateFinalResult() {
