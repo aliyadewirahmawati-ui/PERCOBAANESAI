@@ -193,13 +193,13 @@
                 <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
             </button>
         </header>
-        <main class="max-w-5xl w-full mx-auto mt-8 px-6">
-            <div class="mb-8">
+        <main class="max-w-5xl w-full mx-auto mt-8 px-6 flex flex-col">
+            <div class="mb-8 order-1">
                 <p class="text-sm font-semibold text-blue-600 mb-2"><span id="chapter-class-label">-</span></p>
                 <h1 class="text-3xl font-bold text-slate-800 mb-2">Mau belajar bab yang mana?</h1>
                 <p class="text-slate-500">Pilih satu bab untuk membaca materi dan mengerjakan kuisnya sampai evaluasi akhir.</p>
             </div>
-            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8">
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8 order-3">
                 <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                     <div>
                         <p class="text-sm font-semibold text-blue-600 mb-1">Progress Siswa</p>
@@ -211,12 +211,11 @@
                         <div class="px-4 py-3 rounded-xl bg-green-50 text-center"><p class="text-xs text-green-600">Post-Test</p><strong id="chapter-post-score" class="text-lg text-green-700">-</strong></div>
                     </div>
                 </div>
-                <div class="relative">
-                    <div class="absolute left-0 right-0 top-4 h-1 bg-slate-200 hidden sm:block"><div id="chapter-progress-line" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div></div>
-                    <div id="chapter-progress-steps" class="grid grid-cols-2 sm:grid-cols-5 gap-4 relative"></div>
+                <div class="h-64 md:h-72">
+                    <canvas id="chapter-progress-chart"></canvas>
                 </div>
             </div>
-            <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-6 order-2"></div>
         </main>
         <div id="chapter-choice-dialog" class="hidden fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-6">
             <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
@@ -701,6 +700,7 @@
         // Charts Objects
         let lineChartObj = null;
         let barChartObj = null;
+        let chapterProgressChartObj = null;
 
         // Init Icons
         lucide.createIcons();
@@ -757,14 +757,6 @@
         function renderChapterProgress() {
             const hasPreTest = activeStudent.preScore !== undefined;
             const hasPostTest = activeStudent.postScore !== undefined;
-            const completedSteps = hasPostTest ? 5 : hasPreTest ? 3 : 0;
-            const steps = [
-                { label: 'Pilih Bab', icon: 'library' },
-                { label: 'Pre-Test', icon: 'clipboard-list' },
-                { label: 'Analisis AI', icon: 'brain' },
-                { label: 'Post-Test', icon: 'clipboard-check' },
-                { label: 'Evaluasi', icon: 'trophy' }
-            ];
             document.getElementById('chapter-pre-score').innerText = hasPreTest ? `${activeStudent.preScore}%` : '-';
             document.getElementById('chapter-post-score').innerText = hasPostTest ? `${activeStudent.postScore}%` : '-';
             document.getElementById('chapter-progress-caption').innerText = hasPostTest
@@ -772,13 +764,27 @@
                 : hasPreTest
                     ? 'Pre-Test selesai. Lanjutkan materi rekomendasi untuk menyelesaikan perjalanan belajar.'
                     : 'Belum ada bab yang dimulai. Pilih satu bab untuk memulai perjalanan belajar.';
-            document.getElementById('chapter-progress-line').style.width = `${Math.max(0, (completedSteps - 1) / (steps.length - 1) * 100)}%`;
-            document.getElementById('chapter-progress-steps').innerHTML = steps.map((step, index) => {
-                const isComplete = index < completedSteps;
-                const isCurrent = index === completedSteps && !hasPostTest;
-                return `<div class="flex flex-col items-center text-center gap-2"><div class="w-9 h-9 rounded-full flex items-center justify-center ${isComplete ? 'bg-green-500 text-white' : isCurrent ? 'bg-blue-600 text-white ring-4 ring-blue-100' : 'bg-slate-200 text-slate-500'}"><i data-lucide="${step.icon}" class="w-4 h-4"></i></div><span class="text-xs font-semibold ${isComplete || isCurrent ? 'text-slate-800' : 'text-slate-400'}">${step.label}</span></div>`;
-            }).join('');
-            lucide.createIcons();
+            if (chapterProgressChartObj) chapterProgressChartObj.destroy();
+            chapterProgressChartObj = new Chart(document.getElementById('chapter-progress-chart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Pre-Test', 'Analisis AI', 'Materi Rekomendasi', 'Post-Test', 'Evaluasi'],
+                    datasets: [{
+                        label: 'Nilai siswa (%)',
+                        data: hasPreTest ? [activeStudent.preScore, activeStudent.preScore, activeStudent.preScore, hasPostTest ? activeStudent.postScore : null, hasPostTest ? activeStudent.postScore : null] : [null, null, null, null, null],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        tension: 0.35,
+                        fill: true,
+                        spanGaps: false
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 0, max: 100, ticks: { callback: value => `${value}%` } } } }
+            });
         }
 
         function selectChapter(chapterId) {
