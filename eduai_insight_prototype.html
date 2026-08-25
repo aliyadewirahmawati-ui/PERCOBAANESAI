@@ -325,7 +325,7 @@
                         <p id="res-ai-msg" class="text-slate-600 italic bg-blue-50 p-4 rounded-xl border border-blue-100 leading-relaxed text-sm"></p>
                         
                         <div class="mt-6 flex justify-end">
-                            <button onclick="navigateTo('view-learning')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                            <button onclick="openRecommendedMaterial()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
                                 Mulai Pembelajaran <i data-lucide="play-circle" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -370,32 +370,29 @@
         <main class="max-w-4xl w-full mx-auto mt-8 px-6">
             <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 mb-6">
-                    <i data-lucide="video" class="text-blue-500 w-7 h-7"></i>
-                    <h2 class="text-2xl font-bold text-slate-800">Modul Pembelajaran Interaktif</h2>
+                    <i data-lucide="book-open-text" class="text-blue-500 w-7 h-7"></i>
+                    <h2 id="learning-content-title" class="text-2xl font-bold text-slate-800">Materi Bab</h2>
                 </div>
-                
-                    <div id="learning-resource-visual" class="aspect-video bg-slate-900 rounded-xl mb-6 flex flex-col items-center justify-center text-white relative overflow-hidden group cursor-pointer border-4 border-slate-800">
-                    <div class="absolute inset-0 bg-blue-900/40 group-hover:bg-blue-900/20 transition-colors"></div>
-                    <i data-lucide="play-circle" class="w-16 h-16 text-white/80 group-hover:text-white group-hover:scale-110 transition-all z-10"></i>
-                    <p class="mt-4 font-medium z-10">Klik untuk memutar video simulasi</p>
-                    <p class="text-sm text-slate-400 z-10 mt-1">Sesuai dengan kelemahanmu pada materi Fisika</p>
-                </div>
+                <div id="learning-text-content" class="space-y-5 mb-6"></div>
 
                 <div class="bg-blue-50 border border-blue-100 p-5 rounded-xl mb-8">
-                    <h3 class="font-bold text-blue-800 mb-2">Instruksi AI:</h3>
+                    <h3 id="learning-instruction-title" class="font-bold text-blue-800 mb-2">Petunjuk Belajar:</h3>
                     <p id="learning-resource-description" class="text-slate-600 text-sm leading-relaxed">
                         Tonton simulasi di atas dengan seksama. Perhatikan bagaimana konsep saling berkaitan dan ingat kembali rumus dasar yang telah kamu pelajari. Setelah kamu paham, silakan lanjut ke Post-Test untuk mengukur peningkatanmu.
                     </p>
                 </div>
 
-                <div class="flex justify-end border-t border-slate-100 pt-6">
+                <div class="flex flex-col-reverse sm:flex-row justify-between gap-3 border-t border-slate-100 pt-6">
+                    <button id="learning-back-button" onclick="navigateTo('view-chapters')" class="px-6 py-3 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali Pilih Bab
+                    </button>
                     <button id="learning-action-button" onclick="startPostTest()" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 transform active:scale-95">
                         Mulai Post-Test <i data-lucide="chevron-right" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
             
-            <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 mt-6">
+            <div id="learning-progress-map" class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 mt-6">
                 <h2 class="text-xl font-bold text-slate-800 mb-8 flex items-center gap-2">
                     <i data-lucide="map" class="w-5 h-5 text-blue-600"></i> Learning Progress Map
                 </h2>
@@ -638,6 +635,16 @@
             Kalor: { title: 'Kalor dan Perpindahannya', type: 'Eksperimen virtual', description: 'Bandingkan konduksi, konveksi, dan radiasi.' },
             Vektor: { title: 'Vektor dalam Fisika', type: 'Latihan konseptual', description: 'Latih pemahaman nilai dan arah besaran fisika.' }
         };
+        const lessonContent = {
+            Mekanika: { title: 'Mekanika dan Gerak Lurus', text: 'Gerak lurus adalah perpindahan benda pada lintasan garis lurus. Kecepatan menyatakan perubahan posisi tiap satuan waktu, sedangkan percepatan menyatakan perubahan kecepatan tiap satuan waktu.' },
+            'Newton dan Gaya': { title: 'Newton dan Gaya', text: 'Gaya dapat mengubah gerak benda. Hukum I Newton menjelaskan kelembaman, Hukum II Newton menghubungkan gaya, massa, dan percepatan, sedangkan Hukum III Newton menjelaskan pasangan aksi dan reaksi.' },
+            Gelombang: { title: 'Gelombang', text: 'Gelombang adalah getaran yang merambat dan membawa energi. Gelombang elektromagnetik dapat merambat tanpa medium, termasuk di ruang hampa.' },
+            Optik: { title: 'Optik dan Pembentukan Bayangan', text: 'Cahaya dapat dipantulkan dan dibiaskan. Cermin datar membentuk bayangan maya, tegak, dan sama besar dengan benda.' },
+            Vektor: { title: 'Vektor dalam Fisika', text: 'Besaran vektor memiliki nilai dan arah. Penjumlahan vektor dapat dilakukan dengan metode segitiga, jajargenjang, atau menguraikannya ke dalam komponen.' },
+            Energi: { title: 'Energi', text: 'Energi adalah kemampuan untuk melakukan usaha. Energi potensial dipengaruhi kedudukan benda, sedangkan energi kinetik dipengaruhi massa dan kecepatan benda.' },
+            Listrik: { title: 'Listrik dan Arus DC', text: 'Arus listrik adalah aliran muatan listrik. Tegangan mendorong muatan bergerak dalam rangkaian, sedangkan hambatan mengatur besar arus yang mengalir.' },
+            Kalor: { title: 'Kalor dan Perpindahannya', text: 'Kalor berpindah dari benda bersuhu tinggi ke benda bersuhu rendah melalui konduksi, konveksi, atau radiasi.' }
+        };
         const classMaterials = {
             'Kelas X': [
                 { id: 'bab-1', title: 'Bab 1: Gerak dan Gaya', description: 'Pahami gerak lurus, gaya, dan Hukum Newton.', topics: ['Mekanika', 'Newton dan Gaya'], icon: 'move' },
@@ -667,6 +674,7 @@
         let isSignUp = true;
         let testMode = 'pre'; // 'pre' or 'post'
         let selectedChapter = null;
+        let learningMode = 'intro';
         let activeQuizQuestions = [];
         let currentRoute = 'view-landing';
 
@@ -763,8 +771,16 @@
 
         function chooseChapterAction(action) {
             closeChapterChoice();
-            if (action === 'learn') navigateTo('view-learning');
+            if (action === 'learn') {
+                learningMode = 'intro';
+                navigateTo('view-learning');
+            }
             else startQuiz('pre');
+        }
+
+        function openRecommendedMaterial() {
+            learningMode = 'recommendation';
+            navigateTo('view-learning');
         }
 
         function analyzeStudent(student) {
@@ -1051,16 +1067,23 @@
         function renderLearningResource() {
             if (!activeStudent) return;
             const analysis = normalizeStudent(activeStudent);
-            const resource = selectedChapter ? learningResources[selectedChapter.topics[0]] : learningResources[analysis.weakestTopic] || learningResources.Mekanika;
-            document.getElementById('learning-header-title').innerText = `Materi ${selectedChapter?.title || 'Rekomendasi AI'}`;
-            document.getElementById('learning-resource-visual').querySelector('p').innerText = `${resource.title} - ${resource.type}`;
-            const hasPreTest = activeStudent.preScore !== undefined;
-            document.getElementById('learning-resource-description').innerText = hasPreTest
-                ? `${resource.description} Fokus lanjutan untuk bab ${selectedChapter?.title || 'ini'}. Setelah paham, lanjutkan ke Post-Test.`
-                : `${resource.description} Ini adalah materi pengantar untuk ${selectedChapter?.title || 'bab pilihanmu'}. Setelah paham, lanjutkan ke Pre-Test.`;
+            const chapterTopics = selectedChapter?.topics || ['Mekanika'];
+            const topicsToShow = learningMode === 'recommendation' ? [analysis.weakestTopic] : chapterTopics;
+            document.getElementById('learning-header-title').innerText = learningMode === 'recommendation' ? 'Rekomendasi Materi AI' : `Materi ${selectedChapter?.title || 'Bab'}`;
+            document.getElementById('learning-content-title').innerText = learningMode === 'recommendation' ? `Perbaiki: ${analysis.weakestTopic}` : selectedChapter?.title || 'Materi Bab';
+            document.getElementById('learning-text-content').innerHTML = topicsToShow.map(topic => {
+                const lesson = lessonContent[topic] || { title: topic, text: 'Pelajari konsep utama pada topik ini dan hubungkan dengan contoh dalam kehidupan sehari-hari.' };
+                return `<article class="p-5 rounded-xl border border-slate-200 bg-slate-50"><h3 class="font-bold text-lg text-slate-800 mb-2">${lesson.title}</h3><p class="text-slate-600 leading-relaxed text-sm">${lesson.text}</p></article>`;
+            }).join('');
+            document.getElementById('learning-instruction-title').innerText = learningMode === 'recommendation' ? 'Instruksi AI:' : 'Petunjuk Belajar:';
+            document.getElementById('learning-resource-description').innerText = learningMode === 'recommendation'
+                ? `Hasil pre-test menunjukkan penguasaan ${analysis.weakestTopic} masih ${analysis.topicScores[analysis.weakestTopic] || 0}%. Pelajari materi ini sebelum mengerjakan Post-Test.`
+                : `Pelajari materi teks untuk ${selectedChapter?.title || 'bab pilihanmu'}. Setelah selesai, kamu dapat kembali memilih bab atau memulai Pre-Test.`;
             const actionButton = document.getElementById('learning-action-button');
-            actionButton.innerHTML = `${hasPreTest ? 'Mulai Post-Test' : 'Mulai Pre-Test'} <i data-lucide="chevron-right" class="w-5 h-5"></i>`;
-            actionButton.onclick = hasPreTest ? startPostTest : () => startQuiz('pre');
+            actionButton.innerHTML = `${learningMode === 'recommendation' ? 'Mulai Post-Test' : 'Mulai Pre-Test'} <i data-lucide="chevron-right" class="w-5 h-5"></i>`;
+            actionButton.onclick = learningMode === 'recommendation' ? startPostTest : () => startQuiz('pre');
+            document.getElementById('learning-back-button').classList.toggle('hidden', learningMode === 'recommendation');
+            document.getElementById('learning-progress-map').classList.toggle('hidden', learningMode !== 'recommendation');
             lucide.createIcons();
         }
 
