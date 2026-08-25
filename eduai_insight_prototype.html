@@ -453,8 +453,8 @@
                     <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                         <i data-lucide="map" class="w-5 h-5 text-blue-600"></i> Learning Progress Map
                     </h2>
-                    <button onclick="logoutSiswa()" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-medium transition-colors">
-                        Kembali ke Beranda
+                            <button onclick="returnToChapterSelection()" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                                <i data-lucide="library" class="w-4 h-4"></i> Pilih Materi Lagi
                     </button>
                 </div>
                 <div class="relative">
@@ -781,6 +781,11 @@
         function openRecommendedMaterial() {
             learningMode = 'recommendation';
             navigateTo('view-learning');
+        }
+
+        function returnToChapterSelection() {
+            learningMode = 'intro';
+            navigateTo('view-chapters');
         }
 
         function analyzeStudent(student) {
