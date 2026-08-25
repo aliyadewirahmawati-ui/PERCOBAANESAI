@@ -204,18 +204,28 @@
                     <div>
                         <p class="text-sm font-semibold text-blue-600 mb-1">Progress Siswa</p>
                         <h2 class="text-xl font-bold text-slate-800">Perkembangan Belajar</h2>
-                        <p id="chapter-progress-caption" class="text-sm text-slate-500 mt-1">Mulai perjalanan belajar dari bab pilihanmu.</p>
+                        <p id="chapter-progress-caption" class="text-sm text-slate-500 mt-1">Grafik akan muncul setelah kamu menyelesaikan satu bab.</p>
                     </div>
-                    <div class="flex gap-3">
-                        <div class="px-4 py-3 rounded-xl bg-slate-50 text-center"><p class="text-xs text-slate-500">Pre-Test</p><strong id="chapter-pre-score" class="text-lg text-slate-800">-</strong></div>
-                        <div class="px-4 py-3 rounded-xl bg-green-50 text-center"><p class="text-xs text-green-600">Post-Test</p><strong id="chapter-post-score" class="text-lg text-green-700">-</strong></div>
+                    <div class="flex flex-wrap gap-3">
+                        <div class="px-4 py-3 rounded-xl bg-blue-50 text-center"><p class="text-xs text-blue-600">Bab selesai</p><strong id="chapter-completed-count" class="text-lg text-blue-700">0</strong></div>
+                        <div class="px-4 py-3 rounded-xl bg-slate-50 text-center"><p class="text-xs text-slate-500">Rata-rata Pre</p><strong id="chapter-pre-average" class="text-lg text-slate-800">-</strong></div>
+                        <div class="px-4 py-3 rounded-xl bg-green-50 text-center"><p class="text-xs text-green-600">Rata-rata Post</p><strong id="chapter-post-average" class="text-lg text-green-700">-</strong></div>
+                        <div class="px-4 py-3 rounded-xl bg-amber-50 text-center"><p class="text-xs text-amber-600">Peningkatan</p><strong id="chapter-improvement-average" class="text-lg text-amber-700">-</strong></div>
                     </div>
                 </div>
                 <div class="h-64 md:h-72">
                     <canvas id="chapter-progress-chart"></canvas>
                 </div>
+                <div id="chapter-empty-state" class="hidden text-center py-10 text-slate-500"><i data-lucide="bar-chart-3" class="w-10 h-10 mx-auto mb-3 text-slate-300"></i><p>Grafik perkembangan akan muncul setelah siswa menyelesaikan satu bab.</p></div>
             </div>
             <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-6 order-2"></div>
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mt-8 order-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                    <div><h2 class="text-xl font-bold text-slate-800">Riwayat Belajar per Bab</h2><p class="text-sm text-slate-500 mt-1">Rangkuman hasil belajar setiap bab yang kamu kerjakan.</p></div>
+                    <div class="flex gap-2"><button onclick="downloadStudentReport()" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Download Laporan</button><button onclick="sendProgressToTeacher()" class="px-4 py-2 rounded-lg bg-slate-800 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> Kirim ke Guru</button></div>
+                </div>
+                <div id="chapter-history-list" class="space-y-3"></div>
+            </div>
         </main>
         <div id="chapter-choice-dialog" class="hidden fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-6">
             <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
@@ -588,9 +598,10 @@
 
                 <div id="teacher-sub-progress" class="hidden space-y-6">
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-5">Learning Progress</h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5"><div><h3 class="text-lg font-semibold text-slate-800">Learning Progress per Bab</h3><p class="text-sm text-slate-500 mt-1">Pilih siswa untuk melihat riwayat belajarnya.</p></div><button onclick="downloadTeacherReport()" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Download Laporan</button></div>
                         <div id="progress-list" class="space-y-4"></div>
                     </div>
+                    <div id="teacher-progress-detail" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"><p class="text-slate-500">Pilih siswa untuk melihat detail progres per bab.</p></div>
                 </div>
 
                 <!-- Teacher: AI Rec View -->
@@ -625,6 +636,7 @@
     <script>
         // Database & States
         const usersDb = {};
+        const storageKey = 'eduai-insight-prototype-data';
         const teacherCredentials = { email: 'guru@eduai.id', password: 'guru123' };
         const learningResources = {
             Mekanika: { title: 'Mekanika dan Gerak Lurus', type: 'Simulasi konsep', description: 'Visualisasi hubungan posisi, waktu, dan kecepatan.' },
@@ -701,6 +713,7 @@
         let lineChartObj = null;
         let barChartObj = null;
         let chapterProgressChartObj = null;
+        let selectedTeacherStudentId = null;
 
         // Init Icons
         lucide.createIcons();
@@ -755,43 +768,57 @@
         }
 
         function renderChapterProgress() {
-            const hasPreTest = activeStudent.preScore !== undefined;
-            const hasPostTest = activeStudent.postScore !== undefined;
-            document.getElementById('chapter-pre-score').innerText = hasPreTest ? `${activeStudent.preScore}%` : '-';
-            document.getElementById('chapter-post-score').innerText = hasPostTest ? `${activeStudent.postScore}%` : '-';
-            document.getElementById('chapter-progress-caption').innerText = hasPostTest
-                ? 'Bab terakhir selesai. Kamu dapat memilih bab lain untuk melanjutkan belajar.'
-                : hasPreTest
-                    ? 'Pre-Test selesai. Lanjutkan materi rekomendasi untuk menyelesaikan perjalanan belajar.'
-                    : 'Belum ada bab yang dimulai. Pilih satu bab untuk memulai perjalanan belajar.';
+            const history = getChapterHistory(activeStudent);
+            const completed = history.filter(record => record.status === 'Sudah selesai');
+            const average = key => completed.length ? Math.round(completed.reduce((total, record) => total + record[key], 0) / completed.length) : null;
+            const averagePre = average('preScore');
+            const averagePost = average('postScore');
+            const averageImprovement = average('improvement');
+            document.getElementById('chapter-completed-count').innerText = completed.length;
+            document.getElementById('chapter-pre-average').innerText = averagePre === null ? '-' : `${averagePre}%`;
+            document.getElementById('chapter-post-average').innerText = averagePost === null ? '-' : `${averagePost}%`;
+            document.getElementById('chapter-improvement-average').innerText = averageImprovement === null ? '-' : `${averageImprovement >= 0 ? '+' : ''}${averageImprovement}%`;
+            document.getElementById('chapter-progress-caption').innerText = completed.length
+                ? `${completed.length} bab sudah selesai. Grafik menampilkan perbandingan nilai di setiap bab.`
+                : 'Grafik akan muncul setelah kamu menyelesaikan satu bab.';
+            document.getElementById('chapter-empty-state').classList.toggle('hidden', completed.length > 0);
+            document.getElementById('chapter-progress-chart').parentElement.classList.toggle('hidden', completed.length === 0);
+            renderChapterHistory(history);
             if (chapterProgressChartObj) chapterProgressChartObj.destroy();
+            if (!completed.length) return;
             chapterProgressChartObj = new Chart(document.getElementById('chapter-progress-chart').getContext('2d'), {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: ['Pre-Test', 'Analisis AI', 'Materi Rekomendasi', 'Post-Test', 'Evaluasi'],
-                    datasets: [{
-                        label: 'Nilai siswa (%)',
-                        data: hasPreTest ? [activeStudent.preScore, activeStudent.preScore, activeStudent.preScore, hasPostTest ? activeStudent.postScore : null, hasPostTest ? activeStudent.postScore : null] : [null, null, null, null, null],
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.12)',
-                        pointBackgroundColor: '#2563eb',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        tension: 0.35,
-                        fill: true,
-                        spanGaps: false
-                    }]
+                    labels: completed.map(record => record.shortTitle),
+                    datasets: [
+                        { label: 'Pre-Test', data: completed.map(record => record.preScore), backgroundColor: '#94a3b8', borderRadius: 6 },
+                        { label: 'Post-Test', data: completed.map(record => record.postScore), backgroundColor: '#2563eb', borderRadius: 6 }
+                    ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 0, max: 100, ticks: { callback: value => `${value}%` } } } }
             });
         }
 
+        function renderChapterHistory(history) {
+            const list = document.getElementById('chapter-history-list');
+            if (!history.length) {
+                list.innerHTML = '<p class="text-sm text-slate-500 py-4">Belum ada riwayat bab yang dikerjakan.</p>';
+                return;
+            }
+            list.innerHTML = history.map((record, index) => {
+                const change = record.improvement === null || record.improvement === undefined ? '-' : `${record.improvement >= 0 ? '+' : ''}${record.improvement}%`;
+                const statusClass = record.status === 'Sudah selesai' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700';
+                return `<details class="border border-slate-200 rounded-xl p-4"><summary class="cursor-pointer list-none"><div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"><div><strong class="text-slate-800">${record.title}</strong><p class="text-xs text-slate-500 mt-1">${record.completedAt ? `Selesai ${record.completedAt}` : 'Sedang dipelajari'}</p></div><div class="flex flex-wrap items-center gap-2 text-sm"><span>Pre ${record.preScore ?? '-'}%</span><span>Post ${record.postScore ?? '-'}%</span><strong class="${record.improvement >= 0 ? 'text-green-600' : 'text-red-600'}">${change}</strong><span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${record.status}</span></div></div></summary><div class="mt-4 pt-4 border-t border-slate-100 text-sm text-slate-600 space-y-2"><p><strong>Topik lemah:</strong> ${(record.weakTopics || []).join(', ') || '-'}</p><p><strong>Analisis AI:</strong> ${record.aiExplanation || '-'}</p><p><strong>Rekomendasi:</strong> ${record.recommendation || '-'}</p><p><strong>Evaluasi bab:</strong> ${record.postScore !== null && record.postScore !== undefined ? `Nilai ${record.postScore}% dengan perubahan ${change} dari Pre-Test.` : 'Belum tersedia.'}</p></div></details>`;
+            }).join('');
+        }
+
         function selectChapter(chapterId) {
             const materials = classMaterials[activeStudent.kelas] || classMaterials['Kelas X'];
             selectedChapter = materials.find(material => material.id === chapterId) || materials[0];
+            activeStudent.chapterHistory = getChapterHistory(activeStudent);
+            if (!activeStudent.chapterHistory.some(record => record.chapterId === selectedChapter.id)) activeStudent.chapterHistory.push(createChapterRecord());
             activeStudent.chapterId = selectedChapter.id;
-            if (usersDb[activeStudent.email]) usersDb[activeStudent.email].profile = activeStudent;
+            updateGlobalData(activeStudent);
             document.getElementById('chapter-choice-title').innerText = selectedChapter.title;
             const dialog = document.getElementById('chapter-choice-dialog');
             dialog.classList.remove('hidden');
@@ -810,8 +837,9 @@
             if (action === 'learn') {
                 learningMode = 'intro';
                 navigateTo('view-learning');
+            } else {
+                startQuiz('pre');
             }
-            else startQuiz('pre');
         }
 
         function openRecommendedMaterial() {
@@ -860,6 +888,34 @@
         }
 
         allStudentsData = allStudentsData.map(normalizeStudent);
+
+        function getChapterHistory(student) {
+            return Array.isArray(student?.chapterHistory) ? student.chapterHistory : [];
+        }
+
+        function persistAppData() {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify({ usersDb, students: allStudentsData }));
+            } catch (error) {
+                console.warn('Data progres belum dapat disimpan di browser.', error);
+            }
+        }
+
+        function loadPersistedData() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                Object.assign(usersDb, saved.usersDb || {});
+                (saved.students || []).forEach(savedStudent => {
+                    const index = allStudentsData.findIndex(student => student.id === savedStudent.id || student.email === savedStudent.email);
+                    if (index >= 0) allStudentsData[index] = { ...allStudentsData[index], ...savedStudent };
+                    else allStudentsData.push(normalizeStudent(savedStudent));
+                });
+            } catch (error) {
+                console.warn('Data progres tersimpan tidak dapat dibaca.', error);
+            }
+        }
+
+        loadPersistedData();
 
         // Auth Logic
         function switchAuthMode() {
@@ -934,7 +990,8 @@
                     activeStudent = { ...user.profile, email: email, id: user.id };
                     const materials = classMaterials[activeStudent.kelas] || classMaterials['Kelas X'];
                     selectedChapter = materials.find(material => material.id === activeStudent.chapterId) || null;
-                    if (user.profile.postScore !== undefined) navigateTo('view-final');
+                    if (getChapterHistory(activeStudent).length) navigateTo('view-chapters');
+                    else if (user.profile.postScore !== undefined) navigateTo('view-final');
                     else if (user.profile.preScore !== undefined) {
                         populateResult();
                         navigateTo('view-result');
@@ -967,6 +1024,10 @@
             document.getElementById('auth-password').value = '';
             document.getElementById('auth-error').classList.add('hidden');
             navigateTo('view-landing');
+        }
+
+        function createChapterRecord() {
+            return { chapterId: selectedChapter.id, title: selectedChapter.title, shortTitle: `Bab ${selectedChapter.id.replace('bab-', '')}`, status: 'Sedang dipelajari', preScore: null, postScore: null, improvement: null, weakTopics: [], recommendation: '', aiExplanation: '', completedAt: null };
         }
 
         function startQuiz(mode) {
@@ -1067,6 +1128,10 @@
                     activeStudent.topicScores = getTopicScores(answers, activeQuizQuestions);
                     activeStudent.status = score >= 80 ? 'Sangat Baik' : score >= 60 ? 'Cukup' : 'Perlu Pendampingan';
                     Object.assign(activeStudent, normalizeStudent(activeStudent));
+                    const analysis = normalizeStudent(activeStudent);
+                    const record = getChapterHistory(activeStudent).find(item => item.chapterId === selectedChapter.id) || createChapterRecord();
+                    if (!getChapterHistory(activeStudent).includes(record)) activeStudent.chapterHistory.push(record);
+                    Object.assign(record, { title: selectedChapter.title, shortTitle: `Bab ${selectedChapter.id.replace('bab-', '')}`, preScore: score, status: 'Sedang dipelajari', weakTopics: Object.entries(analysis.topicScores).filter(([, value]) => value < 70).map(([topic]) => topic), recommendation: analysis.aiRecommendation, aiExplanation: analysis.aiExplanation });
                     updateGlobalData(activeStudent);
                     
                     populateResult();
@@ -1074,6 +1139,8 @@
                 } else {
                     activeStudent.postScore = score;
                     activeStudent.improvement = score - activeStudent.preScore;
+                    const record = getChapterHistory(activeStudent).find(item => item.chapterId === selectedChapter.id);
+                    if (record) Object.assign(record, { postScore: score, improvement: score - record.preScore, status: 'Sudah selesai', completedAt: new Date().toLocaleDateString('id-ID') });
                     updateGlobalData(activeStudent);
                     
                     populateFinalResult();
@@ -1088,6 +1155,7 @@
             else allStudentsData.unshift(stu);
             
             if(usersDb[stu.email]) usersDb[stu.email].profile = stu;
+            persistAppData();
         }
 
         function populateResult() {
@@ -1244,7 +1312,50 @@
         }
 
         function renderProgressList() {
-            document.getElementById('progress-list').innerHTML = allStudentsData.map(student => `<div class="p-4 border border-slate-200 rounded-xl"><div class="flex justify-between"><strong>${student.name}</strong><span class="text-sm text-slate-500">${student.preScore ?? 0}% → ${student.postScore ?? '-'}${student.postScore !== undefined ? '%' : ''}</span></div><div class="mt-3 flex flex-wrap gap-2 text-xs"><span class="px-2 py-1 bg-green-50 text-green-700 rounded">Pre-Test</span><span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">AI Analysis</span><span class="px-2 py-1 bg-yellow-50 text-yellow-700 rounded">Teacher Review</span><span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">${student.postScore !== undefined ? 'Final Evaluation' : 'Learning Recommendation'}</span></div></div>`).join('');
+            loadPersistedData();
+            document.getElementById('progress-list').innerHTML = allStudentsData.map(student => `<button onclick="showTeacherProgress(${student.id})" class="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-colors"><div class="flex justify-between"><strong>${student.name}</strong><span class="text-sm text-slate-500">${getChapterHistory(student).length} bab tercatat</span></div><p class="text-xs text-slate-500 mt-1">${student.kelas}</p></button>`).join('');
+            if (selectedTeacherStudentId) showTeacherProgress(selectedTeacherStudentId);
+        }
+
+        function showTeacherProgress(id) {
+            const student = allStudentsData.find(item => item.id === id);
+            if (!student) return;
+            selectedTeacherStudentId = id;
+            const history = getChapterHistory(student);
+            document.getElementById('teacher-progress-detail').innerHTML = `<div class="flex justify-between gap-3 mb-5"><div><h3 class="text-xl font-bold text-slate-800">${student.name}</h3><p class="text-sm text-slate-500">${student.kelas} · ${history.length} bab</p></div><button onclick="downloadTeacherReport(${student.id})" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Download</button></div>${history.length ? `<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50"><tr><th class="p-3">Bab</th><th class="p-3">Pre</th><th class="p-3">Post</th><th class="p-3">Perubahan</th><th class="p-3">Status</th></tr></thead><tbody class="divide-y divide-slate-100">${history.map(record => `<tr><td class="p-3"><strong>${record.title}</strong><p class="text-xs text-slate-500">Lemah: ${(record.weakTopics || []).join(', ') || '-'}</p><p class="text-xs text-slate-500">Analisis AI: ${record.aiExplanation || '-'}</p><p class="text-xs text-slate-500">Rekomendasi: ${record.recommendation || '-'}</p></td><td class="p-3">${record.preScore ?? '-'}${record.preScore !== null ? '%' : ''}</td><td class="p-3">${record.postScore ?? '-'}${record.postScore !== null ? '%' : ''}</td><td class="p-3 font-semibold ${record.improvement >= 0 ? 'text-green-600' : 'text-red-600'}">${record.improvement === null ? '-' : `${record.improvement >= 0 ? '+' : ''}${record.improvement}%`}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-semibold ${record.status === 'Sudah selesai' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}">${record.status}</span><p class="text-xs text-slate-500 mt-1">${record.completedAt || '-'}</p></td></tr>`).join('')}</tbody></table></div>` : '<p class="text-sm text-slate-500">Belum ada bab yang dikerjakan siswa ini.</p>'}`;
+            lucide.createIcons();
+        }
+
+        function buildReportHtml(student) {
+            const history = getChapterHistory(student);
+            const completed = history.filter(record => record.status === 'Sudah selesai');
+            const average = key => completed.length ? Math.round(completed.reduce((sum, record) => sum + record[key], 0) / completed.length) : 0;
+            return `<html><head><title>Laporan Perkembangan - ${student.name}</title><style>body{font-family:Arial,sans-serif;color:#1e293b;padding:32px;line-height:1.5}h1{color:#1d4ed8;margin-bottom:4px}h2{border-bottom:2px solid #dbeafe;padding-bottom:6px;margin-top:28px}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #cbd5e1;padding:9px;text-align:left;font-size:12px}th{background:#eff6ff}.summary{display:flex;gap:24px;margin:18px 0}.summary strong{font-size:20px;display:block;color:#1d4ed8}.muted{color:#64748b;font-size:12px}</style></head><body><h1>Laporan Perkembangan Siswa</h1><p class="muted">Tanggal laporan: ${new Date().toLocaleDateString('id-ID')}</p><p><strong>Nama:</strong> ${student.name}<br><strong>Kelas:</strong> ${student.kelas}</p><div class="summary"><div>Bab selesai<strong>${completed.length}</strong></div><div>Rata-rata Pre-Test<strong>${average('preScore')}%</strong></div><div>Rata-rata Post-Test<strong>${average('postScore')}%</strong></div><div>Peningkatan rata-rata<strong>${completed.length ? `${average('improvement') >= 0 ? '+' : ''}${average('improvement')}%` : '-'}</strong></div></div><h2>Riwayat per Bab</h2><table><tr><th>Bab</th><th>Pre-Test</th><th>Post-Test</th><th>Perubahan</th><th>Status</th><th>Topik Perlu Diperbaiki</th><th>Rekomendasi AI</th></tr>${history.map(record => `<tr><td>${record.title}</td><td>${record.preScore ?? '-' }%</td><td>${record.postScore ?? '-' }%</td><td>${record.improvement === null ? '-' : `${record.improvement >= 0 ? '+' : ''}${record.improvement}%`}</td><td>${record.status}<br>${record.completedAt || ''}</td><td>${(record.weakTopics || []).join(', ') || '-'}</td><td>${record.recommendation || '-'}</td></tr>`).join('')}</table><h2>Ringkasan</h2><p>Perkembangan siswa dirangkum dari ${completed.length} bab yang sudah selesai. Nilai dan rekomendasi pada laporan ini berasal dari hasil kuis siswa.</p></body></html>`;
+        }
+
+        function printReport(student) {
+            const reportWindow = window.open('', '_blank');
+            if (!reportWindow) return;
+            reportWindow.document.write(buildReportHtml(student));
+            reportWindow.document.close();
+            reportWindow.focus();
+            reportWindow.print();
+        }
+
+        function downloadStudentReport() {
+            if (activeStudent) printReport(activeStudent);
+        }
+
+        function downloadTeacherReport(id = selectedTeacherStudentId) {
+            const student = allStudentsData.find(item => item.id === id);
+            if (student) printReport(student);
+        }
+
+        function sendProgressToTeacher() {
+            if (!activeStudent) return;
+            activeStudent.progressSharedAt = new Date().toLocaleString('id-ID');
+            updateGlobalData(activeStudent);
+            window.alert('Perkembangan belajar sudah dikirim dan tersedia pada menu Learning Progress guru.');
         }
 
         function handleStudentChat(e) {
