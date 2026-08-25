@@ -58,32 +58,11 @@
                 Platform pembelajaran adaptif berbasis AI yang membantu guru memahami kemampuan siswa dan memberikan rekomendasi pembelajaran yang lebih efektif.
             </p>
 
-            <div class="flex flex-col sm:flex-row justify-center gap-6">
-                <button onclick="navigateTo('view-teacher-auth')" class="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
-                    <i data-lucide="users" class="w-5 h-5"></i> Login Guru
-                </button>
+            <div class="flex justify-center">
                 <button onclick="navigateTo('view-auth')" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2">
                     <i data-lucide="book-open" class="w-5 h-5"></i> Login Siswa
                 </button>
             </div>
-        </div>
-    </section>
-
-    <section id="view-teacher-auth" class="view-section flex-col items-center justify-center relative overflow-hidden bg-slate-50 p-6">
-        <div class="absolute top-[-10%] right-[-10%] w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20"></div>
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden z-10">
-            <div class="p-8 bg-gradient-to-br from-slate-800 to-blue-900 text-white text-center">
-                <div class="flex justify-center mb-4"><div class="p-3 bg-white/20 rounded-2xl"><i data-lucide="graduation-cap" class="w-8 h-8"></i></div></div>
-                <h2 class="text-2xl font-bold mb-1">Login Guru</h2>
-                <p class="text-blue-100 text-sm">Teacher review diperlukan untuk setiap intervensi AI</p>
-            </div>
-            <form class="p-8 space-y-5" onsubmit="handleTeacherLogin(event)">
-                <div id="teacher-auth-error" class="hidden p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">Email / ID Guru</label><input id="teacher-email" type="email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50" placeholder="guru@eduai.id"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">Password</label><input id="teacher-password" type="password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50" placeholder="Masukkan password"></div>
-                <div class="flex gap-3 pt-3"><button type="button" onclick="navigateTo('view-landing')" class="px-5 py-3 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200">Kembali</button><button type="submit" class="flex-1 py-3 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700">Masuk sebagai Guru</button></div>
-                <p class="text-xs text-slate-400 text-center">Prototype credential: guru@eduai.id / guru123</p>
-            </form>
         </div>
     </section>
 
@@ -637,7 +616,6 @@
         // Database & States
         const usersDb = {};
         const storageKey = 'eduai-insight-prototype-data';
-        const teacherCredentials = { email: 'guru@eduai.id', password: 'guru123' };
         const learningResources = {
             Mekanika: { title: 'Mekanika dan Gerak Lurus', type: 'Simulasi konsep', description: 'Visualisasi hubungan posisi, waktu, dan kecepatan.' },
             'Newton dan Gaya': { title: 'Newton dan Gaya', type: 'Video interaktif', description: 'Eksperimen virtual gaya, massa, dan percepatan.' },
@@ -927,19 +905,6 @@
             document.getElementById('auth-submit-btn').innerHTML = (isSignUp ? 'Daftar Akun' : 'Masuk') + ' <i data-lucide="chevron-right" class="w-4 h-4"></i>';
             document.getElementById('auth-error').classList.add('hidden');
             lucide.createIcons();
-        }
-
-        function handleTeacherLogin(e) {
-            e.preventDefault();
-            const error = document.getElementById('teacher-auth-error');
-            if (document.getElementById('teacher-email').value === teacherCredentials.email && document.getElementById('teacher-password').value === teacherCredentials.password) {
-                error.classList.add('hidden');
-                navigateTo('view-teacher');
-                setTeacherMenu('dashboard');
-            } else {
-                error.innerText = 'Email atau password guru salah.';
-                error.classList.remove('hidden');
-            }
         }
 
         function togglePassword() {
