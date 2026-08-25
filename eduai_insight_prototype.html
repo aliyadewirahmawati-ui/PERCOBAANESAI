@@ -195,9 +195,26 @@
         </header>
         <main class="max-w-5xl w-full mx-auto mt-8 px-6">
             <div class="mb-8">
-                <p class="text-sm font-semibold text-blue-600 mb-2">Kelas <span id="chapter-class-label">-</span></p>
+                <p class="text-sm font-semibold text-blue-600 mb-2"><span id="chapter-class-label">-</span></p>
                 <h1 class="text-3xl font-bold text-slate-800 mb-2">Mau belajar bab yang mana?</h1>
                 <p class="text-slate-500">Pilih satu bab untuk membaca materi dan mengerjakan kuisnya sampai evaluasi akhir.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                    <div>
+                        <p class="text-sm font-semibold text-blue-600 mb-1">Progress Siswa</p>
+                        <h2 class="text-xl font-bold text-slate-800">Perkembangan Belajar</h2>
+                        <p id="chapter-progress-caption" class="text-sm text-slate-500 mt-1">Mulai perjalanan belajar dari bab pilihanmu.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="px-4 py-3 rounded-xl bg-slate-50 text-center"><p class="text-xs text-slate-500">Pre-Test</p><strong id="chapter-pre-score" class="text-lg text-slate-800">-</strong></div>
+                        <div class="px-4 py-3 rounded-xl bg-green-50 text-center"><p class="text-xs text-green-600">Post-Test</p><strong id="chapter-post-score" class="text-lg text-green-700">-</strong></div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute left-0 right-0 top-4 h-1 bg-slate-200 hidden sm:block"><div id="chapter-progress-line" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div></div>
+                    <div id="chapter-progress-steps" class="grid grid-cols-2 sm:grid-cols-5 gap-4 relative"></div>
+                </div>
             </div>
             <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </main>
@@ -722,6 +739,7 @@
             if (!activeStudent) return;
             const materials = classMaterials[activeStudent.kelas] || classMaterials['Kelas X'];
             document.getElementById('chapter-class-label').innerText = activeStudent.kelas;
+            renderChapterProgress();
             document.getElementById('chapter-list').innerHTML = materials.map((material, index) => `
                 <button onclick="selectChapter('${material.id}')" class="text-left bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all group">
                     <div class="flex items-center justify-between mb-5">
@@ -733,6 +751,33 @@
                     <span class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600">Mulai bab <i data-lucide="arrow-right" class="w-4 h-4"></i></span>
                 </button>
             `).join('');
+            lucide.createIcons();
+        }
+
+        function renderChapterProgress() {
+            const hasPreTest = activeStudent.preScore !== undefined;
+            const hasPostTest = activeStudent.postScore !== undefined;
+            const completedSteps = hasPostTest ? 5 : hasPreTest ? 3 : 0;
+            const steps = [
+                { label: 'Pilih Bab', icon: 'library' },
+                { label: 'Pre-Test', icon: 'clipboard-list' },
+                { label: 'Analisis AI', icon: 'brain' },
+                { label: 'Post-Test', icon: 'clipboard-check' },
+                { label: 'Evaluasi', icon: 'trophy' }
+            ];
+            document.getElementById('chapter-pre-score').innerText = hasPreTest ? `${activeStudent.preScore}%` : '-';
+            document.getElementById('chapter-post-score').innerText = hasPostTest ? `${activeStudent.postScore}%` : '-';
+            document.getElementById('chapter-progress-caption').innerText = hasPostTest
+                ? 'Bab terakhir selesai. Kamu dapat memilih bab lain untuk melanjutkan belajar.'
+                : hasPreTest
+                    ? 'Pre-Test selesai. Lanjutkan materi rekomendasi untuk menyelesaikan perjalanan belajar.'
+                    : 'Belum ada bab yang dimulai. Pilih satu bab untuk memulai perjalanan belajar.';
+            document.getElementById('chapter-progress-line').style.width = `${Math.max(0, (completedSteps - 1) / (steps.length - 1) * 100)}%`;
+            document.getElementById('chapter-progress-steps').innerHTML = steps.map((step, index) => {
+                const isComplete = index < completedSteps;
+                const isCurrent = index === completedSteps && !hasPostTest;
+                return `<div class="flex flex-col items-center text-center gap-2"><div class="w-9 h-9 rounded-full flex items-center justify-center ${isComplete ? 'bg-green-500 text-white' : isCurrent ? 'bg-blue-600 text-white ring-4 ring-blue-100' : 'bg-slate-200 text-slate-500'}"><i data-lucide="${step.icon}" class="w-4 h-4"></i></div><span class="text-xs font-semibold ${isComplete || isCurrent ? 'text-slate-800' : 'text-slate-400'}">${step.label}</span></div>`;
+            }).join('');
             lucide.createIcons();
         }
 
