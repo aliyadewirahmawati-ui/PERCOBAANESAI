@@ -175,8 +175,38 @@
         <main class="max-w-5xl w-full mx-auto mt-8 px-6 flex flex-col">
             <div class="mb-8 order-1">
                 <p class="text-sm font-semibold text-blue-600 mb-2"><span id="chapter-class-label">-</span></p>
-                <h1 class="text-3xl font-bold text-slate-800 mb-2">Mau belajar bab yang mana?</h1>
-                <p class="text-slate-500">Pilih satu bab untuk membaca materi dan mengerjakan kuisnya sampai evaluasi akhir.</p>
+                <h1 id="class-page-title" class="text-3xl font-bold text-slate-800 mb-2">Pilih aktivitas belajar</h1>
+                <p id="class-page-description" class="text-slate-500">Akses buku pembelajaran atau pilih bab kuis sesuai kebutuhanmu.</p>
+            </div>
+            <div id="class-options" class="grid grid-cols-1 md:grid-cols-2 gap-6 order-2 mb-8">
+                <article class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex items-start justify-between gap-4 mb-5">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="book-open-text" class="w-6 h-6"></i></div>
+                        <span class="text-xs font-bold uppercase tracking-wide text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Materi</span>
+                    </div>
+                    <h2 id="material-card-title" class="text-2xl font-bold text-slate-800 mb-3">Materi Fisika</h2>
+                    <p class="text-slate-500 leading-relaxed mb-6">Pelajari materi Fisika melalui buku pembelajaran yang tersedia.</p>
+                    <div class="mt-auto flex flex-col sm:flex-row gap-3">
+                        <a id="material-view-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-center transition-colors">Lihat Materi</a>
+                        <a id="material-download-link" href="#" download class="flex-1 px-4 py-3 rounded-xl border border-blue-200 text-blue-700 hover:bg-blue-50 font-semibold text-center transition-colors">Download PDF</a>
+                    </div>
+                </article>
+                <article class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex items-start justify-between gap-4 mb-5">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-6 h-6"></i></div>
+                        <span class="text-xs font-bold uppercase tracking-wide text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Kuis</span>
+                    </div>
+                    <h2 id="quiz-card-title" class="text-2xl font-bold text-slate-800 mb-3">Kuis Fisika</h2>
+                    <p class="text-slate-500 leading-relaxed mb-6">Pilih salah satu bab untuk menguji pemahamanmu.</p>
+                    <button type="button" onclick="showQuizChapters()" class="mt-auto w-full px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold transition-colors flex items-center justify-center gap-2">Pilih Kuis <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                </article>
+            </div>
+            <div id="quiz-chapters-panel" class="hidden order-2 mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                    <div><p class="text-sm font-semibold text-blue-600 mb-1">Kuis Fisika</p><h2 class="text-2xl font-bold text-slate-800">Pilih Bab Kuis</h2></div>
+                    <button type="button" onclick="showClassOptions()" class="self-start px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali</button>
+                </div>
+                <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
             </div>
             <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8 order-3">
                 <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
@@ -197,7 +227,6 @@
                 </div>
                 <div id="chapter-empty-state" class="hidden text-center py-10 text-slate-500"><i data-lucide="bar-chart-3" class="w-10 h-10 mx-auto mb-3 text-slate-300"></i><p>Grafik perkembangan akan muncul setelah siswa menyelesaikan satu bab.</p></div>
             </div>
-            <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-6 order-2"></div>
             <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mt-8 order-4">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                     <div><h2 class="text-xl font-bold text-slate-800">Riwayat Belajar per Bab</h2><p class="text-sm text-slate-500 mt-1">Rangkuman hasil belajar setiap bab yang kamu kerjakan.</p></div>
@@ -616,6 +645,11 @@
         // Database & States
         const usersDb = {};
         const storageKey = 'eduai-insight-prototype-data';
+        const materialFiles = {
+            'Kelas X': { title: 'Materi Fisika Kelas X', file: 'BUku%20Fisika%20Kelas%2010.pdf' },
+            'Kelas XI': { title: 'Materi Fisika Kelas XI', file: 'Buku%20Fisika%20Kelas%2011.pdf' },
+            'Kelas XII': { title: 'Materi Fisika Kelas XII', file: 'Buku%20Fisika%20Kelas%2012.pdf' }
+        };
         const learningResources = {
             Mekanika: { title: 'Mekanika dan Gerak Lurus', type: 'Simulasi konsep', description: 'Visualisasi hubungan posisi, waktu, dan kecepatan.' },
             'Newton dan Gaya': { title: 'Newton dan Gaya', type: 'Video interaktif', description: 'Eksperimen virtual gaya, massa, dan percepatan.' },
@@ -638,19 +672,19 @@
         };
         const classMaterials = {
             'Kelas X': [
-                { id: 'bab-1', title: 'Bab 1: Gerak dan Gaya', description: 'Pahami gerak lurus, gaya, dan Hukum Newton.', topics: ['Mekanika', 'Newton dan Gaya'], icon: 'move' },
-                { id: 'bab-2', title: 'Bab 2: Gelombang dan Optik', description: 'Kenali gelombang, cahaya, dan pembentukan bayangan.', topics: ['Gelombang', 'Optik', 'Vektor'], icon: 'waves' },
-                { id: 'bab-3', title: 'Bab 3: Energi dan Listrik', description: 'Pelajari energi, arus listrik, dan perpindahan kalor.', topics: ['Energi', 'Listrik', 'Kalor'], icon: 'zap' }
+                { id: 'bab-1', title: 'Bab 1: Besaran dan Satuan', description: 'Uji pemahaman tentang besaran, satuan, dan pengukuran.', topics: ['Vektor'], icon: 'ruler' },
+                { id: 'bab-2', title: 'Bab 2: Gerak Lurus', description: 'Uji pemahaman tentang posisi, kecepatan, dan gerak lurus.', topics: ['Mekanika'], icon: 'move' },
+                { id: 'bab-3', title: 'Bab 3: Gerak Melingkar Beraturan', description: 'Uji pemahaman tentang gaya dan perubahan gerak benda.', topics: ['Newton dan Gaya'], icon: 'rotate-cw' }
             ],
             'Kelas XI': [
-                { id: 'bab-1', title: 'Bab 1: Dinamika Gerak', description: 'Pahami gerak lurus, gaya, dan Hukum Newton.', topics: ['Mekanika', 'Newton dan Gaya'], icon: 'move' },
-                { id: 'bab-2', title: 'Bab 2: Gelombang dan Cahaya', description: 'Kenali gelombang, cahaya, dan pembentukan bayangan.', topics: ['Gelombang', 'Optik', 'Vektor'], icon: 'waves' },
-                { id: 'bab-3', title: 'Bab 3: Energi dan Arus', description: 'Pelajari energi, arus listrik, dan perpindahan kalor.', topics: ['Energi', 'Listrik', 'Kalor'], icon: 'zap' }
+                { id: 'bab-1', title: 'Bab 1: Vektor', description: 'Uji pemahaman tentang nilai, arah, dan operasi vektor.', topics: ['Vektor'], icon: 'move-diagonal' },
+                { id: 'bab-2', title: 'Bab 2: Kinematika', description: 'Uji pemahaman tentang posisi, kecepatan, dan gerak.', topics: ['Mekanika'], icon: 'move' },
+                { id: 'bab-3', title: 'Bab 3: Dinamika Gerak Partikel', description: 'Uji pemahaman tentang gaya dan gerak partikel.', topics: ['Newton dan Gaya'], icon: 'orbit' }
             ],
             'Kelas XII': [
-                { id: 'bab-1', title: 'Bab 1: Analisis Gaya', description: 'Pahami gerak lurus, gaya, dan Hukum Newton.', topics: ['Mekanika', 'Newton dan Gaya'], icon: 'move' },
-                { id: 'bab-2', title: 'Bab 2: Gelombang Fisika', description: 'Kenali gelombang, cahaya, dan pembentukan bayangan.', topics: ['Gelombang', 'Optik', 'Vektor'], icon: 'waves' },
-                { id: 'bab-3', title: 'Bab 3: Energi Terapan', description: 'Pelajari energi, arus listrik, dan perpindahan kalor.', topics: ['Energi', 'Listrik', 'Kalor'], icon: 'zap' }
+                { id: 'bab-1', title: 'Bab 1: Gelombang', description: 'Uji pemahaman tentang sifat dan karakteristik gelombang.', topics: ['Gelombang'], icon: 'waves' },
+                { id: 'bab-2', title: 'Bab 2: Cahaya', description: 'Uji pemahaman tentang cahaya dan pembentukan bayangan.', topics: ['Optik'], icon: 'sun' },
+                { id: 'bab-3', title: 'Bab 3: Elektrostatika', description: 'Uji pemahaman tentang arus dan besaran listrik.', topics: ['Listrik'], icon: 'zap' }
             ]
         };
         let allStudentsData = [
@@ -729,7 +763,13 @@
         function renderChapters() {
             if (!activeStudent) return;
             const materials = classMaterials[activeStudent.kelas] || classMaterials['Kelas X'];
+            const materialFile = materialFiles[activeStudent.kelas] || materialFiles['Kelas X'];
             document.getElementById('chapter-class-label').innerText = activeStudent.kelas;
+            document.getElementById('material-card-title').innerText = materialFile.title;
+            document.getElementById('quiz-card-title').innerText = `Kuis Fisika ${activeStudent.kelas.replace('Kelas ', '')}`;
+            document.getElementById('material-view-link').href = materialFile.file;
+            document.getElementById('material-download-link').href = materialFile.file;
+            showClassOptions();
             renderChapterProgress();
             document.getElementById('chapter-list').innerHTML = materials.map((material, index) => `
                 <button onclick="selectChapter('${material.id}')" class="text-left bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all group">
@@ -743,6 +783,17 @@
                 </button>
             `).join('');
             lucide.createIcons();
+        }
+
+        function showQuizChapters() {
+            document.getElementById('class-options').classList.add('hidden');
+            document.getElementById('quiz-chapters-panel').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function showClassOptions() {
+            document.getElementById('class-options').classList.remove('hidden');
+            document.getElementById('quiz-chapters-panel').classList.add('hidden');
         }
 
         function renderChapterProgress() {
