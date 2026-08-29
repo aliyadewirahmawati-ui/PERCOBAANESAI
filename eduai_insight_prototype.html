@@ -13,6 +13,9 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- jsPDF untuk mengunduh rekapan jawaban -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -444,6 +447,7 @@
             <div class="text-center mb-10">
                 <h1 class="text-3xl font-bold text-slate-800 mb-2">Selamat, Evaluasi Selesai!</h1>
                 <p class="text-slate-500">Inilah hasil perjalanan belajarmu, <span id="final-name" class="font-semibold">Siswa</span></p>
+                <button type="button" onclick="document.getElementById('answer-review-section').scrollIntoView({ behavior: 'smooth' })" class="mt-4 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm font-semibold">Lihat Rekapan Jawaban <span aria-hidden="true">↓</span></button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -465,6 +469,24 @@
                     <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="brain" class="text-blue-600 w-5 h-5"></i> Kesimpulan AI</h3>
                     <p id="final-ai-msg" class="text-sm text-slate-600 leading-relaxed"></p>
                 </div>
+            </div>
+
+            <div id="answer-review-section" class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 mt-6 mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Rekapan Jawaban</h2>
+                        <p class="text-sm text-slate-500 mt-1">Lihat kembali jawabanmu dan pahami alasan di balik setiap jawaban.</p>
+                    </div>
+                    <button type="button" onclick="downloadAnswerReview()" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Download Rekapan PDF</button>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+                    <div class="flex gap-2" role="tablist" aria-label="Pilih rekapan ujian">
+                        <button id="review-tab-pre" type="button" onclick="renderAnswerReview('pre')" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-100 text-slate-600">Pre-Test</button>
+                        <button id="review-tab-post" type="button" onclick="renderAnswerReview('post')" class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white">Post-Test</button>
+                    </div>
+                    <div id="review-summary" class="text-sm text-slate-600"></div>
+                </div>
+                <div id="answer-review-list" class="space-y-4"></div>
             </div>
 
             <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 mt-6">
@@ -766,9 +788,43 @@
             { id: 'x-bab3-10', kelas: 'Kelas X', chapterId: 'bab-3', topic: 'Gerak Melingkar Beraturan', competency: 'Hubungan Roda', difficulty: 'medium', text: 'Pada dua roda yang dihubungkan sabuk tanpa slip, besaran yang sama adalah...', options: [{id:'a', t:'Kecepatan tangensial'}, {id:'b', t:'Kecepatan sudut'}, {id:'c', t:'Jari-jari'}, {id:'d', t:'Percepatan sentripetal'}], ans: 'a' }
         ];
 
+        const questionExplanations = {
+            'Besaran Vektor dan Skalar': 'Besaran vektor memiliki nilai dan arah, sedangkan besaran skalar hanya memiliki nilai.',
+            'Besaran Pokok dan Satuan SI': 'Besaran pokok dan satuan SI menjadi dasar pengukuran fisika, seperti massa dalam kilogram dan panjang dalam meter.',
+            'Besaran Turunan': 'Besaran turunan diperoleh dari kombinasi besaran pokok, misalnya kecepatan dalam meter per sekon.',
+            'Dimensi Besaran': 'Dimensi menunjukkan susunan suatu besaran dari besaran pokok, seperti kecepatan yang berdimensi [L][T]^-1.',
+            'Alat Ukur': 'Alat ukur dipilih berdasarkan jenis benda dan ketelitian yang diperlukan, seperti jangka sorong dan mikrometer sekrup.',
+            Kedudukan: 'Kedudukan menyatakan letak benda terhadap titik acuan tertentu.',
+            Jarak: 'Jarak adalah panjang seluruh lintasan yang ditempuh dan merupakan besaran skalar.',
+            Perpindahan: 'Perpindahan adalah perubahan kedudukan dari titik awal ke titik akhir dan memiliki arah.',
+            Kelajuan: 'Kelajuan rata-rata adalah jarak total dibagi waktu total.',
+            Kecepatan: 'Kecepatan rata-rata adalah perpindahan dibagi waktu dan memiliki arah.',
+            Percepatan: 'Percepatan menyatakan perubahan kecepatan setiap satuan waktu.',
+            GLB: 'Pada GLB, benda bergerak lurus dengan kecepatan tetap dan percepatan nol.',
+            GLBB: 'Pada GLBB, benda bergerak dengan percepatan tetap sehingga kecepatannya berubah teratur.',
+            'Gerak Jatuh Bebas': 'Gerak jatuh bebas hanya dipengaruhi gravitasi dan memiliki percepatan menuju bumi.',
+            'Gerak Vertikal ke Atas': 'Saat bergerak ke atas, benda mengalami perlambatan gravitasi hingga kecepatannya nol di titik tertinggi.',
+            'Pengertian GMB': 'Gerak melingkar beraturan memiliki lintasan lingkaran dan kelajuan tetap, meskipun arah kecepatannya berubah.',
+            Periode: 'Periode adalah waktu yang diperlukan untuk menyelesaikan satu putaran penuh.',
+            Frekuensi: 'Frekuensi adalah banyaknya putaran atau getaran yang terjadi setiap satuan waktu.',
+            'Kecepatan Sudut': 'Kecepatan sudut menyatakan perubahan sudut tiap satuan waktu dan biasanya dilambangkan omega.',
+            'Kecepatan Tangensial': 'Kecepatan tangensial selalu menyinggung lintasan dan tegak lurus terhadap jari-jari.',
+            'Percepatan Sentripetal': 'Percepatan sentripetal selalu mengarah ke pusat lingkaran dan menjaga benda tetap pada lintasannya.',
+            'Hubungan Sudut dan Tangensial': 'Kecepatan tangensial berhubungan dengan kecepatan sudut melalui rumus v = omega r.',
+            'Roda Bersinggungan': 'Roda yang bersinggungan tanpa slip memiliki kecepatan tangensial yang sama pada titik singgung.',
+            'Hubungan Roda': 'Roda yang dihubungkan sabuk tanpa slip memiliki kecepatan tangensial yang sama, sedangkan kecepatan sudutnya bergantung pada jari-jari.'
+        };
+        questions.forEach(question => {
+            question.explanation = questionExplanations[question.competency] || 'Pahami definisi, hubungan antarbesaran, dan penerapan konsep ini dalam fisika.';
+            question.optionReasons = Object.fromEntries(question.options.map(option => [option.id, option.id === question.ans
+                ? `Benar. ${question.explanation}`
+                : `Pilihan ${option.id.toUpperCase()} tidak sesuai dengan konsep ${question.competency}.`]));
+        });
+
         activeQuizQuestions = questions;
         let currentQIndex = 0;
         let answers = {};
+        let reviewMode = 'post';
         
         // Charts Objects
         let lineChartObj = null;
@@ -1074,7 +1130,11 @@
                     activeStudent = { ...user.profile, email: email, id: user.id };
                     const materials = classMaterials[activeStudent.kelas] || classMaterials['Kelas X'];
                     selectedChapter = materials.find(material => material.id === activeStudent.chapterId) || null;
-                    if (getChapterHistory(activeStudent).length) navigateTo('view-chapters');
+                    const currentRecord = getCurrentChapterRecord();
+                    if (user.profile.postScore !== undefined && currentRecord?.postTestReview?.length) {
+                        populateFinalResult();
+                        navigateTo('view-final');
+                    } else if (getChapterHistory(activeStudent).length) navigateTo('view-chapters');
                     else if (user.profile.postScore !== undefined) navigateTo('view-final');
                     else if (user.profile.preScore !== undefined) {
                         populateResult();
@@ -1111,7 +1171,27 @@
         }
 
         function createChapterRecord() {
-            return { chapterId: selectedChapter.id, title: selectedChapter.title, shortTitle: `Bab ${selectedChapter.id.replace('bab-', '')}`, status: 'Sedang dipelajari', preScore: null, postScore: null, improvement: null, weakTopics: [], recommendation: '', aiExplanation: '', completedAt: null };
+            return { chapterId: selectedChapter.id, title: selectedChapter.title, shortTitle: `Bab ${selectedChapter.id.replace('bab-', '')}`, status: 'Sedang dipelajari', preScore: null, postScore: null, improvement: null, weakTopics: [], recommendation: '', aiExplanation: '', completedAt: null, preTestReview: [], postTestReview: [] };
+        }
+
+        function buildAnswerReview(quizQuestions, answerMap) {
+            return quizQuestions.map((question, index) => {
+                const selectedAnswerId = answerMap[index];
+                const selectedOption = question.options.find(option => option.id === selectedAnswerId);
+                const correctOption = question.options.find(option => option.id === question.ans);
+                return {
+                    questionId: question.id,
+                    question: question.text,
+                    selectedAnswerId,
+                    selectedAnswerText: selectedOption?.t || 'Tidak dijawab',
+                    correctAnswerId: question.ans,
+                    correctAnswerText: correctOption?.t || '',
+                    isCorrect: selectedAnswerId === question.ans,
+                    competency: question.competency,
+                    explanation: question.explanation,
+                    selectedReason: question.optionReasons?.[selectedAnswerId] || 'Soal ini belum dijawab.'
+                };
+            });
         }
 
         function startQuiz(mode) {
@@ -1208,6 +1288,7 @@
             const score = (correct / activeQuizQuestions.length) * 100;
 
             setTimeout(() => {
+                const review = buildAnswerReview(activeQuizQuestions, answers);
                 if (testMode === 'pre') {
                     activeStudent.preScore = score;
                     activeStudent.topicScores = getTopicScores(answers, activeQuizQuestions);
@@ -1217,7 +1298,7 @@
                     const analysis = normalizeStudent(activeStudent);
                     const record = getChapterHistory(activeStudent).find(item => item.chapterId === selectedChapter.id) || createChapterRecord();
                     if (!getChapterHistory(activeStudent).includes(record)) activeStudent.chapterHistory.push(record);
-                    Object.assign(record, { title: selectedChapter.title, shortTitle: `Bab ${selectedChapter.id.replace('bab-', '')}`, preScore: score, status: 'Sedang dipelajari', weakTopics: Object.entries(analysis.topicScores).filter(([, value]) => value < 70).map(([topic]) => topic), recommendation: analysis.aiRecommendation, aiExplanation: analysis.aiExplanation });
+                    Object.assign(record, { title: selectedChapter.title, shortTitle: `Bab ${selectedChapter.id.replace('bab-', '')}`, preScore: score, status: 'Sedang dipelajari', weakTopics: Object.entries(analysis.topicScores).filter(([, value]) => value < 70).map(([topic]) => topic), recommendation: analysis.aiRecommendation, aiExplanation: analysis.aiExplanation, preTestReview: review });
                     updateGlobalData(activeStudent);
                     
                     populateResult();
@@ -1226,7 +1307,7 @@
                     activeStudent.postScore = score;
                     activeStudent.improvement = score - activeStudent.preScore;
                     const record = getChapterHistory(activeStudent).find(item => item.chapterId === selectedChapter.id);
-                    if (record) Object.assign(record, { postScore: score, improvement: score - record.preScore, status: 'Sudah selesai', completedAt: new Date().toLocaleDateString('id-ID') });
+                    if (record) Object.assign(record, { postScore: score, improvement: score - record.preScore, status: 'Sudah selesai', completedAt: new Date().toLocaleDateString('id-ID'), postTestReview: review });
                     updateGlobalData(activeStudent);
                     
                     populateFinalResult();
@@ -1316,7 +1397,92 @@
             else msg = "Sepertinya kamu butuh sedikit lebih banyak waktu untuk menguasai materi ini. Jangan menyerah, AI telah mengirimkan catatan khusus ke gurumu.";
             
             document.getElementById('final-ai-msg').innerText = msg;
+            renderAnswerReview('post');
             lucide.createIcons();
+        }
+
+        function getCurrentChapterRecord() {
+            return getChapterHistory(activeStudent).find(record => record.chapterId === selectedChapter?.id);
+        }
+
+        function escapeReviewText(value) {
+            return String(value ?? '').replace(/[&<>"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[character]));
+        }
+
+        function renderAnswerReview(mode = reviewMode) {
+            reviewMode = mode;
+            const record = getCurrentChapterRecord();
+            const reviews = record?.[mode === 'pre' ? 'preTestReview' : 'postTestReview'] || [];
+            const list = document.getElementById('answer-review-list');
+            if (!list) return;
+            document.getElementById('review-tab-pre').className = `px-4 py-2 rounded-lg text-sm font-semibold ${mode === 'pre' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}`;
+            document.getElementById('review-tab-post').className = `px-4 py-2 rounded-lg text-sm font-semibold ${mode === 'post' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}`;
+            if (!reviews.length) {
+                document.getElementById('review-summary').innerText = `${mode === 'pre' ? 'Pre-Test' : 'Post-Test'} belum memiliki data rekapan.`;
+                list.innerHTML = '<p class="text-sm text-slate-500 py-4">Rekapan jawaban belum tersedia untuk percobaan ini.</p>';
+                return;
+            }
+            const correctCount = reviews.filter(review => review.isCorrect).length;
+            document.getElementById('review-summary').innerHTML = `<span class="font-semibold">${mode === 'pre' ? 'Pre-Test' : 'Post-Test'}</span> &middot; Benar: <strong class="text-green-700">${correctCount}</strong> &middot; Salah: <strong class="text-red-700">${reviews.length - correctCount}</strong> &middot; Total: <strong>${reviews.length}</strong> &middot; Nilai: <strong>${Math.round(correctCount / reviews.length * 100)}%</strong>`;
+            list.innerHTML = reviews.map((review, index) => {
+                const statusClass = review.isCorrect ? 'border-green-200 bg-green-50/40' : 'border-red-200 bg-red-50/40';
+                const badgeClass = review.isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                const statusLabel = review.isCorrect ? 'Jawaban Benar' : 'Jawaban Salah';
+                const selectedLabel = `${review.selectedAnswerId ? review.selectedAnswerId.toUpperCase() + '. ' : ''}${review.selectedAnswerText}`;
+                const correctLabel = `${review.correctAnswerId.toUpperCase()}. ${review.correctAnswerText}`;
+                return `<article class="p-5 rounded-xl border ${statusClass}"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4"><h3 class="font-bold text-slate-800">Soal ${index + 1}</h3><span class="self-start px-3 py-1 rounded-full text-xs font-semibold ${badgeClass}"><i data-lucide="${review.isCorrect ? 'check-circle-2' : 'x-circle'}" class="inline-block w-4 h-4 align-text-bottom mr-1"></i>${statusLabel}</span></div><p class="text-slate-700 font-medium mb-4">${escapeReviewText(review.question)}</p><div class="space-y-2 text-sm"><p><strong>Jawaban kamu:</strong> ${escapeReviewText(selectedLabel)}</p>${review.isCorrect ? '' : `<p><strong>Jawaban benar:</strong> ${escapeReviewText(correctLabel)}</p><div class="pt-3 mt-3 border-t border-red-100"><p class="font-semibold text-slate-800">Kenapa jawaban kamu salah?</p><p class="text-slate-600 mt-1">${escapeReviewText(review.selectedReason)}</p></div>`}<div class="pt-3 mt-3 border-t border-slate-200"><p class="font-semibold text-slate-800">${review.isCorrect ? 'Kenapa jawaban ini benar?' : `Kenapa jawaban ${review.correctAnswerId.toUpperCase()} benar?`}</p><p class="text-slate-600 mt-1">${escapeReviewText(review.isCorrect ? review.explanation : review.explanation)}</p></div><p class="pt-3 mt-3 border-t border-slate-200"><strong>Kompetensi:</strong> ${escapeReviewText(review.competency)}</p></div></article>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function downloadAnswerReview() {
+            const record = getCurrentChapterRecord();
+            if (!record) return;
+            const pdfApi = window.jspdf?.jsPDF;
+            if (!pdfApi) {
+                window.alert('Fitur PDF belum siap. Silakan coba lagi setelah halaman selesai dimuat.');
+                return;
+            }
+            const documentPdf = new pdfApi();
+            const left = 18;
+            const pageWidth = documentPdf.internal.pageSize.getWidth();
+            const pageHeight = documentPdf.internal.pageSize.getHeight();
+            let y = 18;
+            const addText = (text, size = 10, bold = false, gap = 6) => {
+                documentPdf.setFont('helvetica', bold ? 'bold' : 'normal');
+                documentPdf.setFontSize(size);
+                const lines = documentPdf.splitTextToSize(String(text), pageWidth - left * 2);
+                if (y + lines.length * (size * 0.5 + 2) > pageHeight - 15) { documentPdf.addPage(); y = 18; }
+                documentPdf.text(lines, left, y);
+                y += lines.length * (size * 0.5 + 2) + gap;
+            };
+            const addReviewSection = (title, reviews) => {
+                addText(title, 13, true, 8);
+                if (!reviews?.length) { addText('Belum ada data.', 10, false, 6); return; }
+                reviews.forEach((review, index) => {
+                    addText(`Soal ${index + 1}`, 11, true, 3);
+                    addText(`Pertanyaan: ${review.question}`);
+                    addText(`Jawaban siswa: ${review.selectedAnswerId ? review.selectedAnswerId.toUpperCase() + '. ' : ''}${review.selectedAnswerText}`);
+                    addText(`Jawaban benar: ${review.correctAnswerId.toUpperCase()}. ${review.correctAnswerText}`);
+                    addText(`Status: ${review.isCorrect ? 'BENAR' : 'SALAH'}`);
+                    if (!review.isCorrect) addText(`Alasan jawaban siswa: ${review.selectedReason}`);
+                    addText(`Penjelasan: ${review.explanation}`);
+                    addText(`Kompetensi: ${review.competency}`, 10, false, 8);
+                });
+            };
+            addText('EDUAI INSIGHT', 16, true, 3);
+            addText('REKAPAN HASIL BELAJAR', 13, true, 8);
+            addText(`Nama siswa: ${activeStudent.name}`);
+            addText(`Kelas: ${activeStudent.kelas}`);
+            addText(`Bab: ${record.title}`);
+            addText(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`);
+            addText(`Nilai Pre-Test: ${record.preScore ?? '-'}%`);
+            addText(`Nilai Post-Test: ${record.postScore ?? '-'}%`);
+            addText(`Peningkatan: ${record.improvement === null || record.improvement === undefined ? '-' : `${record.improvement >= 0 ? '+' : ''}${record.improvement}%`}`, 10, false, 10);
+            addReviewSection('REKAPAN PRE-TEST', record.preTestReview);
+            addReviewSection('REKAPAN POST-TEST', record.postTestReview);
+            const safeName = `${activeStudent.name}_${activeStudent.kelas}_${record.shortTitle}`.replace(/[^a-z0-9_-]+/gi, '_').replace(/^_+|_+$/g, '');
+            documentPdf.save(`Rekapan_Fisika_${safeName || 'Siswa'}.pdf`);
         }
 
         function setTeacherMenu(menu) {
