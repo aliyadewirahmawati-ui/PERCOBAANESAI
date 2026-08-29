@@ -677,6 +677,28 @@
             Listrik: { title: 'Listrik dan Arus DC', text: 'Arus listrik adalah aliran muatan listrik. Tegangan mendorong muatan bergerak dalam rangkaian, sedangkan hambatan mengatur besar arus yang mengalir.' },
             Kalor: { title: 'Kalor dan Perpindahannya', text: 'Kalor berpindah dari benda bersuhu tinggi ke benda bersuhu rendah melalui konduksi, konveksi, atau radiasi.' }
         };
+        const competencyLessons = {
+            'Besaran Pokok dan Satuan SI': {
+                title: 'Besaran Pokok dan Satuan SI',
+                explanation: 'Besaran pokok adalah besaran yang satuannya ditetapkan terlebih dahulu. Tujuh besaran pokok SI adalah panjang (meter), massa (kilogram), waktu (sekon), kuat arus (ampere), suhu (kelvin), jumlah zat (mol), dan intensitas cahaya (kandela).'
+            },
+            'Besaran Turunan': {
+                title: 'Besaran Turunan',
+                explanation: 'Besaran turunan diperoleh dari kombinasi beberapa besaran pokok. Contohnya luas = panjang x lebar dengan satuan m2, kecepatan = jarak / waktu dengan satuan m/s, dan gaya = massa x percepatan dengan satuan newton (N).'
+            },
+            'Dimensi Besaran': {
+                title: 'Dimensi Besaran',
+                explanation: 'Dimensi menunjukkan susunan suatu besaran dari besaran pokok. Panjang berdimensi [L], massa [M], dan waktu [T]. Kecepatan berdimensi [L][T]^-1, percepatan [L][T]^-2, sedangkan gaya [M][L][T]^-2.'
+            },
+            'Alat Ukur': {
+                title: 'Alat Ukur',
+                explanation: 'Pemilihan alat ukur bergantung pada benda dan ketelitian yang dibutuhkan. Mistar digunakan untuk panjang sederhana, jangka sorong untuk panjang, diameter, dan kedalaman, sedangkan mikrometer sekrup untuk benda yang sangat tipis atau kecil.'
+            },
+            'Besaran Vektor dan Skalar': {
+                title: 'Besaran Vektor dan Skalar',
+                explanation: 'Besaran skalar hanya memiliki nilai, seperti massa, waktu, suhu, jarak, dan kelajuan. Besaran vektor memiliki nilai sekaligus arah, seperti perpindahan, kecepatan, percepatan, dan gaya.'
+            }
+        };
         const classMaterials = {
             'Kelas X': [
                 { id: 'bab-1', title: 'Bab 1: Besaran dan Satuan', description: 'Uji pemahaman tentang besaran, satuan, dan pengukuran.', topics: ['Vektor'], icon: 'ruler' },
@@ -712,16 +734,16 @@
 
         // Questions Data
         const questions = [
-            { id: 'x-bab1-1', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Vektor', difficulty: 'easy', text: 'Besaran fisika yang memiliki nilai sekaligus arah disebut...', options: [{id:'a', t:'Besaran Pokok'}, {id:'b', t:'Besaran Turunan'}, {id:'c', t:'Besaran Vektor'}, {id:'d', t:'Besaran Skalar'}], ans: 'c' },
-            { id: 'x-bab1-2', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Pokok', difficulty: 'easy', text: 'Manakah yang termasuk besaran pokok dalam SI?', options: [{id:'a', t:'Luas'}, {id:'b', t:'Kecepatan'}, {id:'c', t:'Massa'}, {id:'d', t:'Gaya'}], ans: 'c' },
-            { id: 'x-bab1-3', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Satuan Panjang', difficulty: 'easy', text: 'Satuan SI untuk panjang adalah...', options: [{id:'a', t:'Centimeter'}, {id:'b', t:'Kilometer'}, {id:'c', t:'Meter'}, {id:'d', t:'Milimeter'}], ans: 'c' },
+            { id: 'x-bab1-1', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Vektor dan Skalar', difficulty: 'easy', text: 'Besaran fisika yang memiliki nilai sekaligus arah disebut...', options: [{id:'a', t:'Besaran Pokok'}, {id:'b', t:'Besaran Turunan'}, {id:'c', t:'Besaran Vektor'}, {id:'d', t:'Besaran Skalar'}], ans: 'c' },
+            { id: 'x-bab1-2', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Pokok dan Satuan SI', difficulty: 'easy', text: 'Manakah yang termasuk besaran pokok dalam SI?', options: [{id:'a', t:'Luas'}, {id:'b', t:'Kecepatan'}, {id:'c', t:'Massa'}, {id:'d', t:'Gaya'}], ans: 'c' },
+            { id: 'x-bab1-3', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Pokok dan Satuan SI', difficulty: 'easy', text: 'Satuan SI untuk panjang adalah...', options: [{id:'a', t:'Centimeter'}, {id:'b', t:'Kilometer'}, {id:'c', t:'Meter'}, {id:'d', t:'Milimeter'}], ans: 'c' },
             { id: 'x-bab1-4', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Turunan', difficulty: 'easy', text: 'Besaran yang diperoleh dari kombinasi beberapa besaran pokok disebut...', options: [{id:'a', t:'Besaran skalar'}, {id:'b', t:'Besaran turunan'}, {id:'c', t:'Besaran vektor'}, {id:'d', t:'Besaran standar'}], ans: 'b' },
             { id: 'x-bab1-5', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Dimensi Besaran', difficulty: 'medium', text: 'Dimensi dari kecepatan adalah...', options: [{id:'a', t:'[L][T]^-1'}, {id:'b', t:'[L][T]^-2'}, {id:'c', t:'[M][L][T]^-2'}, {id:'d', t:'[M][L]^2[T]^-2'}], ans: 'a' },
             { id: 'x-bab1-6', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Alat Ukur', difficulty: 'medium', text: 'Alat yang paling tepat digunakan untuk mengukur diameter luar dan diameter dalam sebuah benda adalah...', options: [{id:'a', t:'Mistar'}, {id:'b', t:'Jangka sorong'}, {id:'c', t:'Stopwatch'}, {id:'d', t:'Neraca'}], ans: 'b' },
             { id: 'x-bab1-7', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Alat Ukur', difficulty: 'easy', text: 'Mikrometer sekrup digunakan untuk mengukur...', options: [{id:'a', t:'Waktu'}, {id:'b', t:'Massa'}, {id:'c', t:'Ketebalan benda yang sangat tipis'}, {id:'d', t:'Suhu'}], ans: 'c' },
-            { id: 'x-bab1-8', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Satuan Massa', difficulty: 'easy', text: 'Satuan SI dari massa adalah...', options: [{id:'a', t:'Gram'}, {id:'b', t:'Kilogram'}, {id:'c', t:'Ton'}, {id:'d', t:'Miligram'}], ans: 'b' },
+            { id: 'x-bab1-8', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Pokok dan Satuan SI', difficulty: 'easy', text: 'Satuan SI dari massa adalah...', options: [{id:'a', t:'Gram'}, {id:'b', t:'Kilogram'}, {id:'c', t:'Ton'}, {id:'d', t:'Miligram'}], ans: 'b' },
             { id: 'x-bab1-9', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Turunan', difficulty: 'easy', text: 'Manakah yang merupakan contoh besaran turunan?', options: [{id:'a', t:'Waktu'}, {id:'b', t:'Suhu'}, {id:'c', t:'Panjang'}, {id:'d', t:'Kecepatan'}], ans: 'd' },
-            { id: 'x-bab1-10', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Skalar', difficulty: 'easy', text: 'Besaran yang hanya memiliki nilai tanpa memiliki arah disebut...', options: [{id:'a', t:'Besaran vektor'}, {id:'b', t:'Besaran skalar'}, {id:'c', t:'Besaran pokok'}, {id:'d', t:'Besaran dimensi'}], ans: 'b' },
+            { id: 'x-bab1-10', kelas: 'Kelas X', chapterId: 'bab-1', topic: 'Besaran dan Satuan', competency: 'Besaran Vektor dan Skalar', difficulty: 'easy', text: 'Besaran yang hanya memiliki nilai tanpa memiliki arah disebut...', options: [{id:'a', t:'Besaran vektor'}, {id:'b', t:'Besaran skalar'}, {id:'c', t:'Besaran pokok'}, {id:'d', t:'Besaran dimensi'}], ans: 'b' },
             { id: 'x-bab2-1', kelas: 'Kelas X', chapterId: 'bab-2', topic: 'Gerak Lurus', competency: 'Kedudukan', difficulty: 'easy', text: 'Kedudukan suatu benda dalam gerak lurus menyatakan...', options: [{id:'a', t:'Letak benda terhadap titik acuan'}, {id:'b', t:'Panjang seluruh lintasan'}, {id:'c', t:'Perubahan kecepatan tiap waktu'}, {id:'d', t:'Waktu untuk menempuh lintasan'}], ans: 'a' },
             { id: 'x-bab2-2', kelas: 'Kelas X', chapterId: 'bab-2', topic: 'Gerak Lurus', competency: 'Jarak', difficulty: 'easy', text: 'Jarak adalah...', options: [{id:'a', t:'Perubahan posisi dari awal ke akhir'}, {id:'b', t:'Panjang lintasan yang ditempuh'}, {id:'c', t:'Perubahan kecepatan'}, {id:'d', t:'Arah gerak benda'}], ans: 'b' },
             { id: 'x-bab2-3', kelas: 'Kelas X', chapterId: 'bab-2', topic: 'Gerak Lurus', competency: 'Perpindahan', difficulty: 'easy', text: 'Perpindahan merupakan...', options: [{id:'a', t:'Besaran skalar tanpa arah'}, {id:'b', t:'Panjang lintasan seluruhnya'}, {id:'c', t:'Perubahan kedudukan dari awal ke akhir'}, {id:'d', t:'Hasil kali jarak dan waktu'}], ans: 'c' },
@@ -785,6 +807,16 @@
                 if (answerMap[index] === question.ans) correct[question.topic] = (correct[question.topic] || 0) + 1;
             });
             return Object.fromEntries(Object.keys(totals).map(topic => [topic, Math.round(((correct[topic] || 0) / totals[topic]) * 100)]));
+        }
+
+        function getCompetencyScores(answerMap, quizQuestions = activeQuizQuestions) {
+            const totals = {};
+            const correct = {};
+            quizQuestions.forEach((question, index) => {
+                totals[question.competency] = (totals[question.competency] || 0) + 1;
+                if (answerMap[index] === question.ans) correct[question.competency] = (correct[question.competency] || 0) + 1;
+            });
+            return Object.fromEntries(Object.keys(totals).map(competency => [competency, Math.round(((correct[competency] || 0) / totals[competency]) * 100)]));
         }
 
         function renderChapters() {
@@ -1179,6 +1211,7 @@
                 if (testMode === 'pre') {
                     activeStudent.preScore = score;
                     activeStudent.topicScores = getTopicScores(answers, activeQuizQuestions);
+                    activeStudent.competencyScores = getCompetencyScores(answers, activeQuizQuestions);
                     activeStudent.status = score >= 80 ? 'Sangat Baik' : score >= 60 ? 'Cukup' : 'Perlu Pendampingan';
                     Object.assign(activeStudent, normalizeStudent(activeStudent));
                     const analysis = normalizeStudent(activeStudent);
@@ -1230,21 +1263,37 @@
             if (!activeStudent) return;
             const analysis = normalizeStudent(activeStudent);
             const chapterTopics = selectedChapter?.topics || ['Mekanika'];
-            const topicsToShow = learningMode === 'recommendation' ? [analysis.weakestTopic] : chapterTopics;
-            document.getElementById('learning-header-title').innerText = learningMode === 'recommendation' ? 'Rekomendasi Materi AI' : `Materi ${selectedChapter?.title || 'Bab'}`;
-            document.getElementById('learning-content-title').innerText = learningMode === 'recommendation' ? `Perbaiki: ${analysis.weakestTopic}` : selectedChapter?.title || 'Materi Bab';
-            document.getElementById('learning-text-content').innerHTML = topicsToShow.map(topic => {
-                const lesson = lessonContent[topic] || { title: topic, text: 'Pelajari konsep utama pada topik ini dan hubungkan dengan contoh dalam kehidupan sehari-hari.' };
-                return `<article class="p-5 rounded-xl border border-slate-200 bg-slate-50"><h3 class="font-bold text-lg text-slate-800 mb-2">${lesson.title}</h3><p class="text-slate-600 leading-relaxed text-sm">${lesson.text}</p></article>`;
-            }).join('');
-            document.getElementById('learning-instruction-title').innerText = learningMode === 'recommendation' ? 'Instruksi AI:' : 'Petunjuk Belajar:';
-            document.getElementById('learning-resource-description').innerText = learningMode === 'recommendation'
-                ? `Hasil pre-test menunjukkan penguasaan ${analysis.weakestTopic} masih ${analysis.topicScores[analysis.weakestTopic] || 0}%. Pelajari materi ini sebelum mengerjakan Post-Test.`
-                : `Pelajari materi teks untuk ${selectedChapter?.title || 'bab pilihanmu'}. Setelah selesai, kamu dapat kembali memilih bab atau memulai Pre-Test.`;
+            const isRecommendation = learningMode === 'recommendation';
+            const weakCompetencies = Object.entries(analysis.competencyScores || {})
+                .filter(([, score]) => score < 70)
+                .sort(([, scoreA], [, scoreB]) => scoreA - scoreB);
+            const getCompetencyStatus = score => score < 40 ? 'Sangat perlu dikuatkan' : score < 70 ? 'Perlu dikuatkan' : score < 85 ? 'Cukup dikuasai' : 'Sudah dikuasai';
+            document.getElementById('learning-header-title').innerText = isRecommendation ? 'Rekomendasi Materi AI' : `Materi ${selectedChapter?.title || 'Bab'}`;
+            document.getElementById('learning-content-title').innerText = isRecommendation ? `Perbaiki: ${selectedChapter?.title || 'Bab ini'}` : selectedChapter?.title || 'Materi Bab';
+
+            if (isRecommendation && Object.keys(analysis.competencyScores || {}).length) {
+                document.getElementById('learning-text-content').innerHTML = weakCompetencies.length
+                    ? `<div class="space-y-4"><div><h3 class="text-lg font-bold text-slate-800">Bagian yang Perlu Dikuatkan</h3><p class="text-slate-600 mt-1">Berdasarkan hasil Pre-Test, fokus utama belajarmu adalah:</p></div>${weakCompetencies.map(([competency, score]) => {
+                        const lesson = competencyLessons[competency] || { title: competency, explanation: 'Pelajari kembali konsep utama pada bagian ini dan hubungkan dengan contoh soal yang relevan.' };
+                        return `<article class="p-5 rounded-xl border border-amber-200 bg-amber-50/60"><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3"><div><h3 class="font-bold text-lg text-slate-800">${lesson.title}</h3><p class="text-sm text-slate-500 mt-1">Penguasaan: ${score}%</p></div><span class="self-start px-3 py-1 rounded-full text-xs font-semibold ${score < 40 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">${getCompetencyStatus(score)}</span></div><div class="h-2 bg-white rounded-full overflow-hidden mb-4"><div class="h-2 rounded-full ${score < 40 ? 'bg-red-500' : 'bg-amber-500'}" style="width: ${score}%"></div></div><h4 class="font-semibold text-slate-800 mb-2">Materi Penguatan</h4><p class="text-slate-600 leading-relaxed text-sm whitespace-pre-line">${lesson.explanation}</p></article>`;
+                    }).join('')}</div>`
+                    : '<div class="p-5 rounded-xl border border-green-200 bg-green-50"><p class="font-semibold text-green-800">Pemahamanmu pada bab ini sudah baik.</p><p class="text-sm text-green-700 mt-1">Silakan lanjutkan ke Post-Test atau pelajari materi pengayaan.</p></div>';
+                document.getElementById('learning-instruction-title').innerText = 'Fokus Belajar:';
+                document.getElementById('learning-resource-description').innerText = weakCompetencies.length
+                    ? 'Pelajari seluruh bagian yang perlu dikuatkan di atas sebelum mengerjakan Post-Test.'
+                    : 'Silakan lanjutkan ke Post-Test atau pelajari materi pengayaan.';
+            } else {
+                document.getElementById('learning-text-content').innerHTML = chapterTopics.map(topic => {
+                    const lesson = lessonContent[topic] || { title: topic, text: 'Pelajari konsep utama pada topik ini dan hubungkan dengan contoh dalam kehidupan sehari-hari.' };
+                    return `<article class="p-5 rounded-xl border border-slate-200 bg-slate-50"><h3 class="font-bold text-lg text-slate-800 mb-2">${lesson.title}</h3><p class="text-slate-600 leading-relaxed text-sm">${lesson.text}</p></article>`;
+                }).join('');
+                document.getElementById('learning-instruction-title').innerText = 'Petunjuk Belajar:';
+                document.getElementById('learning-resource-description').innerText = `Pelajari materi teks untuk ${selectedChapter?.title || 'bab pilihanmu'}. Setelah selesai, kamu dapat kembali memilih bab atau memulai Pre-Test.`;
+            }
             const actionButton = document.getElementById('learning-action-button');
-            actionButton.innerHTML = `${learningMode === 'recommendation' ? 'Mulai Post-Test' : 'Mulai Pre-Test'} <i data-lucide="chevron-right" class="w-5 h-5"></i>`;
-            actionButton.onclick = learningMode === 'recommendation' ? startPostTest : () => startQuiz('pre');
-            document.getElementById('learning-back-button').classList.toggle('hidden', learningMode === 'recommendation');
+            actionButton.innerHTML = `${isRecommendation ? 'Mulai Post-Test' : 'Mulai Pre-Test'} <i data-lucide="chevron-right" class="w-5 h-5"></i>`;
+            actionButton.onclick = isRecommendation ? startPostTest : () => startQuiz('pre');
+            document.getElementById('learning-back-button').classList.toggle('hidden', isRecommendation);
             lucide.createIcons();
         }
 
