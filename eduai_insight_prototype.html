@@ -652,9 +652,9 @@
         };
         const chapterPdfLinks = {
             'Kelas X': {
-                'bab-1': 'https://github.com/aliyadewirahmawati-ui/PERCOBAANESAI/blob/accae1ba704ce06ecc1a1b2eb1de8628496b364c/Buku%20Fisika%20Kelas%2010%20-%20Bab%201.pdf',
-                'bab-2': 'https://github.com/aliyadewirahmawati-ui/PERCOBAANESAI/blob/accae1ba704ce06ecc1a1b2eb1de8628496b364c/Buku%20Fisika%20Kelas%2010%20-%20Bab%202.pdf',
-                'bab-3': 'https://github.com/aliyadewirahmawati-ui/PERCOBAANESAI/blob/accae1ba704ce06ecc1a1b2eb1de8628496b364c/Buku%20Fisika%20Kelas%2010%20-%20Bab%203.pdf'
+                'bab-1': 'Buku%20Fisika%20Kelas%2010%20-%20Bab%201.pdf',
+                'bab-2': 'Buku%20Fisika%20Kelas%2010%20-%20Bab%202.pdf',
+                'bab-3': 'Buku%20Fisika%20Kelas%2010%20-%20Bab%203.pdf'
             }
         };
         const learningResources = {
@@ -874,7 +874,7 @@
                 if (activeStudent?.kelas === 'Kelas X') {
                     const pdfUrl = chapterPdfLinks['Kelas X']?.[selectedChapter?.id];
                     if (pdfUrl) {
-                        window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+                        window.open(pdfUrl, '_blank');
                     } else {
                         window.alert('Materi untuk bab ini belum tersedia.');
                     }
