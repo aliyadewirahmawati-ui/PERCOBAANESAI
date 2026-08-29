@@ -650,6 +650,13 @@
             'Kelas XI': { title: 'Materi Fisika Kelas XI', file: 'Buku%20Fisika%20Kelas%2011.pdf' },
             'Kelas XII': { title: 'Materi Fisika Kelas XII', file: 'Buku%20Fisika%20Kelas%2012.pdf' }
         };
+        const chapterPdfLinks = {
+            'Kelas X': {
+                'bab-1': 'https://github.com/aliyadewirahmawati-ui/PERCOBAANESAI/blob/accae1ba704ce06ecc1a1b2eb1de8628496b364c/Buku%20Fisika%20Kelas%2010%20-%20Bab%201.pdf',
+                'bab-2': 'https://github.com/aliyadewirahmawati-ui/PERCOBAANESAI/blob/accae1ba704ce06ecc1a1b2eb1de8628496b364c/Buku%20Fisika%20Kelas%2010%20-%20Bab%202.pdf',
+                'bab-3': 'https://github.com/aliyadewirahmawati-ui/PERCOBAANESAI/blob/accae1ba704ce06ecc1a1b2eb1de8628496b364c/Buku%20Fisika%20Kelas%2010%20-%20Bab%203.pdf'
+            }
+        };
         const learningResources = {
             Mekanika: { title: 'Mekanika dan Gerak Lurus', type: 'Simulasi konsep', description: 'Visualisasi hubungan posisi, waktu, dan kecepatan.' },
             'Newton dan Gaya': { title: 'Newton dan Gaya', type: 'Video interaktif', description: 'Eksperimen virtual gaya, massa, dan percepatan.' },
@@ -864,6 +871,15 @@
         function chooseChapterAction(action) {
             closeChapterChoice();
             if (action === 'learn') {
+                if (activeStudent?.kelas === 'Kelas X') {
+                    const pdfUrl = chapterPdfLinks['Kelas X']?.[selectedChapter?.id];
+                    if (pdfUrl) {
+                        window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                        window.alert('Materi untuk bab ini belum tersedia.');
+                    }
+                    return;
+                }
                 learningMode = 'intro';
                 navigateTo('view-learning');
             } else {
