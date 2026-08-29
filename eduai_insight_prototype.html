@@ -171,9 +171,12 @@
                 <div class="p-1.5 bg-blue-100 rounded-lg"><i data-lucide="library" class="text-blue-600 w-5 h-5"></i></div>
                 <span class="font-bold text-slate-800 text-lg">Pilih Materi Belajar</span>
             </div>
-            <button onclick="goToStudentHome()" class="text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2 text-sm font-medium">
-                <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
-            </button>
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <span id="student-header-name" class="text-sm font-semibold text-slate-700 truncate max-w-[9rem] sm:max-w-none"></span>
+                <button onclick="goToStudentHome()" class="shrink-0 text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2 text-sm font-medium">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                </button>
+            </div>
         </header>
         <main class="max-w-5xl w-full mx-auto mt-8 px-6 flex flex-col">
             <div class="mb-8 order-1">
@@ -880,6 +883,7 @@
             const materials = classMaterials[activeStudent.kelas] || classMaterials['Kelas X'];
             const materialFile = materialFiles[activeStudent.kelas] || materialFiles['Kelas X'];
             document.getElementById('chapter-class-label').innerText = activeStudent.kelas;
+            document.getElementById('student-header-name').innerText = activeStudent?.name ? `Halo, ${activeStudent.name}` : '';
             document.getElementById('material-card-title').innerText = materialFile.title;
             document.getElementById('quiz-card-title').innerText = `Kuis Fisika ${activeStudent.kelas.replace('Kelas ', '')}`;
             document.getElementById('material-view-link').href = materialFile.file;
